@@ -9,4 +9,6 @@ public sealed class NodeCommandExecution : Node
     public required List<Node> Arguments { get; init; }
     
     public NodeCommandExecution? NextInPipe { get; set; }
+    
+    public bool NextInPipePassStdOutAsArgs { get; set; }
 }

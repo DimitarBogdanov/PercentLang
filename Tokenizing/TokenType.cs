@@ -7,6 +7,7 @@ public enum TokenType
     
     Comma,
     Pipe,
+    Colon,
     OpAdd,
     OpSub,
     OpMul,

@@ -35,16 +35,21 @@ public sealed class FileExecutor
             .Where(x => x is not null)
             .Select(x => x!)
             .ToList();
-        
-        CommandExecution exec = new(ex.CommandName, input, args)
-        {
-            Muted = muted
-        };
+
+        CommandExecution exec = CommandExecution.Create(ex.CommandName, input, args);
+        exec.Muted = muted;
 
         await exec.Run();
 
         if (ex.NextInPipe is { } next)
         {
+            if (ex.NextInPipePassStdOutAsArgs)
+            {
+                next.Arguments.Add(new NodeString
+                {
+                    Value = exec.StdOut
+                });
+            }
             await ExecCommand(next, exec.StdOut);
         }
     }

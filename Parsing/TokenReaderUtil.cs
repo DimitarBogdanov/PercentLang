@@ -40,6 +40,11 @@ public sealed class TokenReaderUtil
     {
         return Current().Type == type;
     }
+    
+    public bool CurrentIs(params TokenType[] type)
+    {
+        return type.Contains(Current().Type);
+    }
 
     public bool NextIs(TokenType type)
     {

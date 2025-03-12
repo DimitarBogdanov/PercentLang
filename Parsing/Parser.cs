@@ -82,7 +82,7 @@ public sealed class Parser
         throw new ParseException("Expected expression");
     }
 
-    private Node ParseCommand()
+    private NodeCommandExecution ParseCommand()
     {
         int line = _tokens.Current().Line;
         string name = ParseNameRef();
@@ -90,15 +90,26 @@ public sealed class Parser
         List<Node> args = [];
         while (!_tokens.IsEof()
                && _tokens.CurrentLine() == line
-               && !_tokens.CurrentIs(TokenType.Pipe))
+               && !_tokens.CurrentIs(TokenType.Pipe, TokenType.Colon))
         {
             args.Add(ParseExpr(false));
+        }
+
+        NodeCommandExecution? nextCommand = null;
+        bool passOutAsArgs = false;
+        if (_tokens.CurrentIs(TokenType.Pipe, TokenType.Colon))
+        {
+            passOutAsArgs = _tokens.CurrentIs(TokenType.Colon);
+            _tokens.Advance(); // skip the pipe
+            nextCommand = ParseCommand();
         }
 
         return new NodeCommandExecution
         {
             CommandName = name,
-            Arguments = args
+            Arguments = args,
+            NextInPipe = nextCommand,
+            NextInPipePassStdOutAsArgs = passOutAsArgs
         };
     }
 

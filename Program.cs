@@ -10,8 +10,7 @@ public static class Program
     public static async Task Main(string[] args)
     {
         Tokenizer tok = new(    """
-                                    ping 127.0.0.1
-                                    ipconfig
+                                    echo 127.0.0.1 : echo
                                     """);
         List<Token> tokens = tok.Tokenize();
 

@@ -156,6 +156,10 @@ public sealed class Tokenizer
                 case '|':
                     PushTok(TokenType.Pipe, "|");
                     continue;
+                
+                case ':':
+                    PushTok(TokenType.Colon, ":");
+                    continue;
             }
 
             _value.Append(current);

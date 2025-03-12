@@ -3,23 +3,23 @@ using System.Text;
 
 namespace PercentLang.Execution;
 
-public sealed class CommandExecution
+public abstract class CommandExecution
 {
-    public CommandExecution(string command, string input, List<string> args)
+    protected CommandExecution(string command, string input, List<string> args)
     {
         CommandName = command;
         Arguments = args;
 
         StdIn = input;
-        _out = new StringBuilder();
-        _err = new StringBuilder();
+        Out = new StringBuilder();
+        Err = new StringBuilder();
     }
     
     public string CommandName { get; }
 
     public string StdIn  { get; }
-    public string StdOut => _out.ToString();
-    public string StdErr => _err.ToString();
+    public string StdOut => Out.ToString();
+    public string StdErr => Err.ToString();
     
     public Exception? RunException { get; private set; }
     
@@ -29,9 +29,16 @@ public sealed class CommandExecution
     
     public bool Muted { get; set; }
 
-    private readonly StringBuilder _out;
-    private readonly StringBuilder _err;
+    protected readonly StringBuilder Out;
+    protected readonly StringBuilder Err;
 
+    public static CommandExecution Create(string command, string input, List<string> args)
+    {
+        return Builtins.Factories.ContainsKey(command)
+            ? new BuiltinCommandExecution(command, input, args)
+            : new ProcessCommandExecution(command, input, args);
+    }
+    
     public async Task<bool> Run()
     {
         try
@@ -45,56 +52,6 @@ public sealed class CommandExecution
             return false;
         }
     }
-    
-    private async Task RunInternal()
-    {
-        ProcessStartInfo startInfo = new()
-        {
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            FileName = CommandName
-        };
-        
-        Arguments.ForEach(startInfo.ArgumentList.Add);
 
-        Process process = new();
-        process.StartInfo = startInfo;
-
-        process.EnableRaisingEvents = true;
-        process.ErrorDataReceived += (_, e) =>
-        {
-            _err.AppendLine(e.Data);
-            if (!Muted)
-            {
-                Console.WriteLine(e.Data);
-            }
-        };
-        process.OutputDataReceived += (_, e) =>
-        {
-            _out.AppendLine(e.Data);
-            if (!Muted)
-            {
-                Console.WriteLine(e.Data);
-            }
-        };
-
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        await using (StreamWriter sw = process.StandardInput)
-        {
-            if (sw.BaseStream.CanWrite)
-            {
-                await sw.WriteLineAsync(StdIn);
-            }
-        }
-        
-        await process.WaitForExitAsync();
-
-        ResultCode = process.ExitCode;
-    }
+    protected abstract Task RunInternal();
 }
