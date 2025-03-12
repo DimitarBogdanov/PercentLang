@@ -16,7 +16,7 @@ public static class Program
 
         foreach (Token t in tokens)
         {
-            Console.WriteLine($"{t.Type} :: {t.Value}");
+            Console.WriteLine($"{t.Line,-2} {t.Type} :: {t.Value}");
         }
     }
 }

@@ -22,6 +22,7 @@ public sealed class Tokenizer
     private readonly StringBuilder     _value;
     private readonly string            _input;
 
+    private int   _line  = 1;
     private int   _pos   = -1;
     private State _state = State.Default;
 
@@ -42,7 +43,7 @@ public sealed class Tokenizer
                 }
                 
                 PushTokInferType();
-                PushTok(TokenType.LineBreak);
+                _line++;
                 continue;
             }
             
@@ -196,7 +197,7 @@ public sealed class Tokenizer
     private void PushTok(TokenType type)
     {
         string value = _value.ToString().Trim();
-        _tokens.AddLast(new Token(value, type));
+        _tokens.AddLast(new Token(value, type, _line));
 
         _value.Clear();
     }

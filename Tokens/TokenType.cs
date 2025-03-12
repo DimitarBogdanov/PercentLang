@@ -5,7 +5,6 @@ public enum TokenType
     Id,
     String,
     Number,
-    LineBreak,
     
     Period,
     Comma,
