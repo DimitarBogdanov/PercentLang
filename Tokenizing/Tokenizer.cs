@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace PercentLang.Tokens;
+namespace PercentLang.Tokenizing;
 
 public sealed class Tokenizer
 {

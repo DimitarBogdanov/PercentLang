@@ -1,4 +1,4 @@
-﻿using PercentLang.Tokens;
+﻿using PercentLang.Tokenizing;
 
 namespace PercentLang;
 
