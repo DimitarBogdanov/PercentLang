@@ -2,12 +2,11 @@
 
 public enum TokenType
 {
-    Id,
+    Default,
     String,
-    Number,
     
-    Period,
     Comma,
+    Pipe,
     OpAdd,
     OpSub,
     OpMul,

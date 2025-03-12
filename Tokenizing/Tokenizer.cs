@@ -8,7 +8,6 @@ public sealed class Tokenizer
     {
         Default,
         String,
-        Number
     }
 
     public Tokenizer(string input)
@@ -76,29 +75,6 @@ public sealed class Tokenizer
                 continue;
             }
 
-            if (_value.Length == 0 && Char.IsDigit(current))
-            {
-                PushTokInferType();
-                _value.Append(current);
-                _state = State.Number;
-                continue;
-            }
-            
-            if (_state == State.Number)
-            {
-                if (Char.IsDigit(current) || (current == '.' && !_value.ToString().Contains('.')))
-                {
-                    _value.Append(current);
-                }
-                else 
-                {
-                    PushTokInferType();
-                    _state = State.Default;
-                }
-
-                continue;
-            }
-
             if (Char.IsWhiteSpace(current))
             {
                 PushTokInferType();
@@ -153,10 +129,6 @@ public sealed class Tokenizer
                     PushTok(TokenType.OpGt, ">");
                     continue;
                 
-                case '.':
-                    PushTok(TokenType.Period, ".");
-                    continue;
-                
                 case ',':
                     PushTok(TokenType.Comma, ",");
                     continue;
@@ -179,6 +151,10 @@ public sealed class Tokenizer
                 
                 case '%':
                     PushTok(TokenType.OpMod, "%");
+                    continue;
+                
+                case '|':
+                    PushTok(TokenType.Pipe, "|");
                     continue;
             }
 
@@ -225,12 +201,11 @@ public sealed class Tokenizer
         TokenType t = _state switch
         {
             State.String => TokenType.String,
-            State.Number => TokenType.Number,
 
-            _ => TokenType.Id
+            _ => TokenType.Default
         };
 
-        if (t == TokenType.Id)
+        if (t == TokenType.Default)
         {
             t = trimmedVal switch
             {
@@ -241,7 +216,7 @@ public sealed class Tokenizer
                 "for"    => TokenType.KwFor,
                 "until"  => TokenType.KwUntil,
                 
-                _ => TokenType.Id
+                _ => TokenType.Default
             };
         }
 

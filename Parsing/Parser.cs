@@ -16,6 +16,8 @@ public sealed class Parser
 
     private readonly TokenReaderUtil _tokens;
 
+    private int _currentLine;
+
     public NodeFile Parse()
     {
         NodeFile file = new();
@@ -38,6 +40,7 @@ public sealed class Parser
 
     private Node ParseLine()
     {
+        _currentLine = _tokens.CurrentLine();
         if (IsVarAssign())
         {
             return ParseVarAssign();
@@ -47,10 +50,15 @@ public sealed class Parser
             return ParseCommand();
         }
 
+        if (_currentLine == _tokens.CurrentLine())
+        {
+            throw new ParseException($"There are more tokens on line {_currentLine} than expected");
+        }
+
         throw new ParseException("Expected command, if/loop, or variable assignment");
     }
 
-    private Node ParseExpr()
+    private Node ParseExpr(bool allowCommandExecutions)
     {
         if (IsString())
         {
@@ -59,7 +67,16 @@ public sealed class Parser
 
         if (IsNameRef())
         {
-            return ParseCommand();
+            if (allowCommandExecutions)
+            {
+                return ParseCommand();
+            }
+
+            string nameRef = ParseNameRef();
+            return new NodeString
+            {
+                Value = nameRef
+            };
         }
 
         throw new ParseException("Expected expression");
@@ -67,11 +84,21 @@ public sealed class Parser
 
     private Node ParseCommand()
     {
+        int line = _tokens.Current().Line;
         string name = ParseNameRef();
+
+        List<Node> args = [];
+        while (!_tokens.IsEof()
+               && _tokens.CurrentLine() == line
+               && !_tokens.CurrentIs(TokenType.Pipe))
+        {
+            args.Add(ParseExpr(false));
+        }
 
         return new NodeCommandExecution
         {
-            CommandName = name
+            CommandName = name,
+            Arguments = args
         };
     }
 
@@ -94,7 +121,7 @@ public sealed class Parser
     {
         NodeVarRef var = ParseVarRef();
         _tokens.Advance(); // skip '='
-        Node value = ParseExpr();
+        Node value = ParseExpr(true);
 
         return new NodeVarAssign
         {
@@ -122,7 +149,7 @@ public sealed class Parser
 
     private bool IsVarRef()
     {
-        return _tokens.CurrentIs(TokenType.Id)
+        return _tokens.CurrentIs(TokenType.Default)
                && _tokens.Current().Value.StartsWith('$');
     }
 
@@ -140,7 +167,7 @@ public sealed class Parser
 
     private bool IsNameRef()
     {
-        return _tokens.CurrentIs(TokenType.Id)
+        return _tokens.CurrentIs(TokenType.Default)
                && !_tokens.Current().Value.StartsWith('$');
     }
 
@@ -148,18 +175,6 @@ public sealed class Parser
     {
         StringBuilder name = new(_tokens.Current().Value);
         _tokens.Advance();
-        while (_tokens.CurrentIs(TokenType.Period))
-        {
-            name.Append('.');
-            _tokens.Advance();
-            if (!_tokens.CurrentIs(TokenType.Id))
-            {
-                throw new ParseException("Expected identifier");
-            }
-
-            name.Append(_tokens.Current().Value);
-            _tokens.Advance();
-        }
 
         return name.ToString();
     }

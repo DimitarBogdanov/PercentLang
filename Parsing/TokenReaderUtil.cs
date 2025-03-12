@@ -20,6 +20,11 @@ public sealed class TokenReaderUtil
         return Peek(0);
     }
 
+    public int CurrentLine()
+    {
+        return Current().Line;
+    }
+
     public Token Peek(int with = 1)
     {
         int idx = _pos + with;
