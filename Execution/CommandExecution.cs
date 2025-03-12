@@ -5,8 +5,10 @@ namespace PercentLang.Execution;
 
 public abstract class CommandExecution
 {
-    protected CommandExecution(string command, string input, List<string> args)
+    protected CommandExecution(ExecutionEngine engine, string command, string input, List<string> args)
     {
+        Engine = engine;
+        
         CommandName = command;
         Arguments = args;
 
@@ -31,12 +33,14 @@ public abstract class CommandExecution
 
     protected readonly StringBuilder Out;
     protected readonly StringBuilder Err;
+    
+    public ExecutionEngine Engine { get; }
 
-    public static CommandExecution Create(string command, string input, List<string> args)
+    public static CommandExecution Create(ExecutionEngine engine, string command, string input, List<string> args)
     {
         return Builtins.Factories.ContainsKey(command)
-            ? new BuiltinCommandExecution(command, input, args)
-            : new ProcessCommandExecution(command, input, args);
+            ? new BuiltinCommandExecution(engine, command, input, args)
+            : new ProcessCommandExecution(engine, command, input, args);
     }
     
     public async Task<bool> Run()

@@ -11,7 +11,10 @@ public static class Program
     {
         Tokenizer tok = new(    """
                                     $Name = "Test"
-                                    echo $Name
+                                    $Cmd = "echo"
+                                    alias say $Cmd
+                                    say $Name
+                                    runcmd echo hi
                                     """);
         List<Token> tokens = tok.Tokenize();
 

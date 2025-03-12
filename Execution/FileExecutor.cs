@@ -42,7 +42,13 @@ public sealed class FileExecutor
             .Select(x => x!)
             .ToList();
 
-        CommandExecution exec = CommandExecution.Create(ex.CommandName, input, args);
+        string commandName = ex.CommandName;
+        if (_engine.Aliases.TryGetValue(commandName, out string? aliasedName))
+        {
+            commandName = aliasedName;
+        }
+
+        CommandExecution exec = CommandExecution.Create(_engine, commandName, input, args);
         exec.Muted = muted;
 
         await exec.Run();
