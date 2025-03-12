@@ -22,6 +22,12 @@ public sealed class FileExecutor
                     await ExecCommand(ex);
                     break;
                 }
+
+                case NodeVarAssign nva:
+                {
+                    _engine.Variables[nva.Var.Name] = nva.Value;
+                    break;
+                }
             }
         }
     }
@@ -31,7 +37,7 @@ public sealed class FileExecutor
         bool muted = ex.NextInPipe != null;
         
         List<string> args = ex.Arguments
-            .Select(x => x.GetStringRepresentation())
+            .Select(x => x.GetStringRepresentation(_engine))
             .Where(x => x is not null)
             .Select(x => x!)
             .ToList();

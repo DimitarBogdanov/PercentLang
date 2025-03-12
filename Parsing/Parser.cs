@@ -79,6 +79,11 @@ public sealed class Parser
             };
         }
 
+        if (IsVarRef())
+        {
+            return ParseVarRef();
+        }
+
         throw new ParseException("Expected expression");
     }
 

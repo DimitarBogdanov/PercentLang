@@ -1,8 +1,10 @@
-﻿namespace PercentLang.Ast;
+﻿using PercentLang.Execution;
+
+namespace PercentLang.Ast;
 
 public abstract class Node
 {
-    public virtual string? GetStringRepresentation()
+    public virtual string? GetStringRepresentation(ExecutionEngine engine)
     {
         return null;
     }

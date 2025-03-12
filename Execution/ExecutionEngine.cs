@@ -7,9 +7,13 @@ public sealed class ExecutionEngine
     public ExecutionEngine(NodeFile file)
     {
         File = file;
+        
+        Variables = new Dictionary<string, Node>();
     }
     
     public NodeFile File { get; }
+
+    public Dictionary<string, Node> Variables { get; }
 
     public async Task Execute()
     {

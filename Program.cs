@@ -10,7 +10,8 @@ public static class Program
     public static async Task Main(string[] args)
     {
         Tokenizer tok = new(    """
-                                    echo 127.0.0.1 : echo
+                                    $Name = "Test"
+                                    echo $Name
                                     """);
         List<Token> tokens = tok.Tokenize();
 
