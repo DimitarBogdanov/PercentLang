@@ -6,10 +6,10 @@ namespace PercentLang;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         Tokenizer tok = new(    """
-                                    $Name = "Peter"
+                                    ipconfig
                                     """);
         List<Token> tokens = tok.Tokenize();
 

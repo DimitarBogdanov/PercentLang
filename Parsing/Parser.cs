@@ -1,4 +1,5 @@
-﻿using PercentLang.Ast;
+﻿using System.Text;
+using PercentLang.Ast;
 using PercentLang.Tokenizing;
 
 namespace PercentLang.Parsing;
@@ -41,6 +42,10 @@ public sealed class Parser
         {
             return ParseVarAssign();
         }
+        else if (IsNameRef())
+        {
+            return ParseCommand();
+        }
 
         throw new ParseException("Expected command, if/loop, or variable assignment");
     }
@@ -52,7 +57,22 @@ public sealed class Parser
             return ParseString();
         }
 
+        if (IsNameRef())
+        {
+            return ParseCommand();
+        }
+
         throw new ParseException("Expected expression");
+    }
+
+    private Node ParseCommand()
+    {
+        string name = ParseNameRef();
+
+        return new NodeCommandExecution
+        {
+            CommandName = name
+        };
     }
 
     private bool IsVarAssign()
@@ -116,6 +136,32 @@ public sealed class Parser
         {
             Name = varName
         };
+    }
+
+    private bool IsNameRef()
+    {
+        return _tokens.CurrentIs(TokenType.Id)
+               && !_tokens.Current().Value.StartsWith('$');
+    }
+
+    private string ParseNameRef()
+    {
+        StringBuilder name = new(_tokens.Current().Value);
+        _tokens.Advance();
+        while (_tokens.CurrentIs(TokenType.Period))
+        {
+            name.Append('.');
+            _tokens.Advance();
+            if (!_tokens.CurrentIs(TokenType.Id))
+            {
+                throw new ParseException("Expected identifier");
+            }
+
+            name.Append(_tokens.Current().Value);
+            _tokens.Advance();
+        }
+
+        return name.ToString();
     }
 
     private bool Try(Func<bool> action)
