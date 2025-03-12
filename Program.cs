@@ -1,4 +1,5 @@
 ﻿using PercentLang.Ast;
+using PercentLang.Execution;
 using PercentLang.Parsing;
 using PercentLang.Tokenizing;
 
@@ -10,6 +11,7 @@ public static class Program
     {
         Tokenizer tok = new(    """
                                     ipconfig
+                                    ping
                                     """);
         List<Token> tokens = tok.Tokenize();
 
@@ -26,5 +28,13 @@ public static class Program
         {
             Console.WriteLine(msg);
         }
+
+        if (parser.Messages.Count != 0)
+        {
+            return;
+        }
+
+        ExecutionEngine engine = new(file);
+        await engine.Execute();
     }
 }
