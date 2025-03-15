@@ -186,7 +186,7 @@ public sealed class Tokenizer
     {
         if (_value.Length != 0)
         {
-            throw new InvalidOperationException("Cannot use express value when there is already a store value");
+            PushTokInferType();
         }
 
         _value.Append(expressValue);
