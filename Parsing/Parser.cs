@@ -61,31 +61,52 @@ public sealed class Parser
 
     private Node ParseExpr(bool allowCommandExecutions)
     {
+        Node returnValue;
+        
         if (IsString())
         {
-            return ParseString();
+            returnValue = ParseString();
         }
-
-        if (IsNameRef())
+        else if (IsNameRef())
         {
             if (allowCommandExecutions)
             {
-                return ParseCommand();
+                returnValue = ParseCommand();
             }
-
-            string nameRef = ParseNameRef();
-            return new NodeString
+            else
             {
-                Value = nameRef
+                string nameRef = ParseNameRef();
+                returnValue = new NodeString
+                {
+                    Value = nameRef
+                };
+            }
+        }
+        else if (IsVarRef())
+        {
+            returnValue = ParseVarRef();
+        }
+        else
+        {
+            throw new ParseException("Expected expression");
+        }
+
+        if (IsPipe() || _tokens.CurrentIs(TokenType.Colon))
+        {
+            FilterType filters = ParseFiltersIfAny();
+            
+            NodeCommandExecution next = ParsePipe();
+            returnValue = new NodeValueWrappedCommandExecution
+            {
+                CommandName = "",
+                Arguments = [],
+                Value = returnValue,
+                Filters = filters,
+                NextInPipe = next
             };
         }
 
-        if (IsVarRef())
-        {
-            return ParseVarRef();
-        }
-
-        throw new ParseException("Expected expression");
+        return returnValue;
     }
 
     private NodeCommandExecution ParseCommand()
@@ -101,39 +122,12 @@ public sealed class Parser
             args.Add(ParseExpr(false));
         }
 
-        FilterType filter = FilterType.None;
-        if (_tokens.CurrentIs(TokenType.Colon))
-        {
-            _tokens.Advance();
-            do
-            {
-                FilterType res = _tokens.Current().Value switch
-                {
-                    "stdout" => FilterType.StdOut,
-                    "stderr" => FilterType.StdErr,
-                    "result" => FilterType.Result,
-                    "muted"  => FilterType.Muted,
-                    "as_arg" => FilterType.PassAsArg,
-                    
-                    _ => (FilterType)(-1)
-                };
-
-                if (res == (FilterType)(-1))
-                {
-                    throw new ParseException("Invalid filter");
-                }
-
-                filter |= res;
-                
-                _tokens.Advance();
-            } while (_tokens.CurrentIs(TokenType.Comma));
-        }
+        FilterType filters = ParseFiltersIfAny();
 
         NodeCommandExecution? nextCommand = null;
-        if (_tokens.CurrentIs(TokenType.Pipe))
+        if (IsPipe())
         {
-            _tokens.Advance(); // skip the pipe
-            nextCommand = ParseCommand();
+            nextCommand = ParsePipe();
         }
 
         return new NodeCommandExecution
@@ -141,7 +135,7 @@ public sealed class Parser
             CommandName = name,
             Arguments = args,
             NextInPipe = nextCommand,
-            Filters = filter
+            Filters = filters
         };
     }
 
@@ -208,6 +202,17 @@ public sealed class Parser
         };
     }
 
+    private bool IsPipe()
+    {
+        return _tokens.CurrentIs(TokenType.Pipe);
+    }
+
+    private NodeCommandExecution ParsePipe()
+    {
+        _tokens.Advance();
+        return ParseCommand();
+    }
+
     private bool IsNameRef()
     {
         return _tokens.CurrentIs(TokenType.Default)
@@ -220,6 +225,44 @@ public sealed class Parser
         _tokens.Advance();
 
         return name.ToString();
+    }
+
+    private FilterType ParseFiltersIfAny()
+    {
+        FilterType filters = FilterType.None;
+        if (_tokens.CurrentIs(TokenType.Colon))
+        {
+            _tokens.Advance();
+            do
+            {
+                if (_tokens.CurrentIs(TokenType.Comma))
+                {
+                    _tokens.Advance();
+                }
+                
+                FilterType res = _tokens.Current().Value switch
+                {
+                    "stdout" => FilterType.StdOut,
+                    "stderr" => FilterType.StdErr,
+                    "result" => FilterType.Result,
+                    "muted"  => FilterType.Muted,
+                    "as_arg" => FilterType.PassAsArg,
+                    
+                    _ => (FilterType)(-1)
+                };
+
+                if (res == (FilterType)(-1))
+                {
+                    throw new ParseException($"Invalid filter '{_tokens.Current().Value}'");
+                }
+
+                filters |= res;
+                
+                _tokens.Advance();
+            } while (_tokens.CurrentIs(TokenType.Comma));
+        }
+
+        return filters;
     }
 
     private bool Try(Func<bool> action)

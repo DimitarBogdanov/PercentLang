@@ -2,7 +2,7 @@
 
 namespace PercentLang.Ast;
 
-public sealed class NodeCommandExecution : Node
+public class NodeCommandExecution : Node
 {
     public required string CommandName { get; init; }
 

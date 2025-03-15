@@ -10,7 +10,9 @@ public static class Program
     public static async Task Main(string[] args)
     { 
         Tokenizer tok = new(    """
-                                    ipconfig : as_arg | echo
+                                    $Var = ipconfig : muted
+                                    $Res = $Var : as_arg | echo : muted, result
+                                    echo $Res
                                     """);
         List<Token> tokens = tok.Tokenize();
 

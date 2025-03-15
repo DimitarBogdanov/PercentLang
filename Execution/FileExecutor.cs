@@ -42,21 +42,30 @@ public sealed class FileExecutor
 
     private async Task ExecCommand(NodeCommandExecution ex, string input = "")
     {
+        CommandExecution exec;
         bool muted = ex.Filters.HasFlag(FilterType.Muted) || ex.NextInPipe != null;
-        
-        List<string> args = ex.Arguments
-            .Select(x => x.GetStringRepresentation(_engine))
-            .Where(x => x is not null)
-            .Select(x => x!)
-            .ToList();
 
-        string commandName = ex.CommandName;
-        if (_engine.Aliases.TryGetValue(commandName, out string? aliasedName))
+        if (ex is NodeValueWrappedCommandExecution valueWrapped)
         {
-            commandName = aliasedName;
+            exec = new ValueWrappedCommandExecution(_engine, ex.Filters, valueWrapped.Value);
         }
+        else
+        {
+            List<string> args = ex.Arguments
+                .Select(x => x.GetStringRepresentation(_engine))
+                .Where(x => x is not null)
+                .Select(x => x!)
+                .ToList();
 
-        CommandExecution exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, args);
+            string commandName = ex.CommandName;
+            if (_engine.Aliases.TryGetValue(commandName, out string? aliasedName))
+            {
+                commandName = aliasedName;
+            }
+
+            exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, args);
+        }
+        
         exec.Muted = muted;
 
         await exec.Run();

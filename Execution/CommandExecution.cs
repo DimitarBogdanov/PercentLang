@@ -26,7 +26,7 @@ public abstract class CommandExecution
     public string StdOut => Out.ToString();
     public string StdErr => Err.ToString();
     
-    public Exception? RunException { get; private set; }
+    public Exception? RunException { get; protected set; }
     
     public List<string> Arguments { get; }
     
