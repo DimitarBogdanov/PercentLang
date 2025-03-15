@@ -1,9 +1,11 @@
-﻿namespace PercentLang.Execution;
+﻿using PercentLang.Ast;
+
+namespace PercentLang.Execution;
 
 public sealed class BuiltinCommandExecution : CommandExecution
 {
-    public BuiltinCommandExecution(ExecutionEngine engine, string command, string input, List<string> args)
-        : base(engine, command, input, args)
+    public BuiltinCommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
+        : base(engine, filters, command, input, args)
     {
     }
     

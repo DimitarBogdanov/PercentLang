@@ -8,13 +8,9 @@ namespace PercentLang;
 public static class Program
 {
     public static async Task Main(string[] args)
-    {
+    { 
         Tokenizer tok = new(    """
-                                    $Name = "Test"
-                                    $Cmd = "echo"
-                                    alias say $Cmd
-                                    say $Name
-                                    runcmd echo hi
+                                    ipconfig : as_arg | echo
                                     """);
         List<Token> tokens = tok.Tokenize();
 

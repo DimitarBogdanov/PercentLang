@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using PercentLang.Ast;
+using PercentLang.Execution;
 using PercentLang.Tokenizing;
 
 namespace PercentLang.Parsing;
@@ -100,11 +101,37 @@ public sealed class Parser
             args.Add(ParseExpr(false));
         }
 
-        NodeCommandExecution? nextCommand = null;
-        bool passOutAsArgs = false;
-        if (_tokens.CurrentIs(TokenType.Pipe, TokenType.Colon))
+        FilterType filter = FilterType.None;
+        if (_tokens.CurrentIs(TokenType.Colon))
         {
-            passOutAsArgs = _tokens.CurrentIs(TokenType.Colon);
+            _tokens.Advance();
+            do
+            {
+                FilterType res = _tokens.Current().Value switch
+                {
+                    "stdout" => FilterType.StdOut,
+                    "stderr" => FilterType.StdErr,
+                    "result" => FilterType.Result,
+                    "muted"  => FilterType.Muted,
+                    "as_arg" => FilterType.PassAsArg,
+                    
+                    _ => (FilterType)(-1)
+                };
+
+                if (res == (FilterType)(-1))
+                {
+                    throw new ParseException("Invalid filter");
+                }
+
+                filter |= res;
+                
+                _tokens.Advance();
+            } while (_tokens.CurrentIs(TokenType.Comma));
+        }
+
+        NodeCommandExecution? nextCommand = null;
+        if (_tokens.CurrentIs(TokenType.Pipe))
+        {
             _tokens.Advance(); // skip the pipe
             nextCommand = ParseCommand();
         }
@@ -114,7 +141,7 @@ public sealed class Parser
             CommandName = name,
             Arguments = args,
             NextInPipe = nextCommand,
-            NextInPipePassStdOutAsArgs = passOutAsArgs
+            Filters = filter
         };
     }
 

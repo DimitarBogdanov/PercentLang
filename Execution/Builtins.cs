@@ -36,7 +36,7 @@ public static class Builtins
             string cmdName = cmd.Arguments[0];
             List<string> args = cmd.Arguments.Skip(1).ToList();
 
-            CommandExecution exec = CommandExecution.Create(cmd.Engine, cmdName, "", args);
+            CommandExecution exec = CommandExecution.Create(cmd.Engine, FilterType.StdOut, cmdName, "", args);
             exec.Run().Wait();
         }
     };

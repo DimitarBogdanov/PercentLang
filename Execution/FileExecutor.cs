@@ -25,7 +25,15 @@ public sealed class FileExecutor
 
                 case NodeVarAssign nva:
                 {
-                    _engine.Variables[nva.Var.Name] = nva.Value;
+                    if (nva.Value is NodeCommandExecution nce)
+                    {
+                        await ExecCommand(nce);
+                        _engine.Variables[nva.Var.Name] = new NodeString { Value = _engine.GetLastCommandOutputRespectFilters() };
+                    }
+                    else
+                    {
+                        _engine.Variables[nva.Var.Name] = nva.Value;
+                    }
                     break;
                 }
             }
@@ -34,7 +42,7 @@ public sealed class FileExecutor
 
     private async Task ExecCommand(NodeCommandExecution ex, string input = "")
     {
-        bool muted = ex.NextInPipe != null;
+        bool muted = ex.Filters.HasFlag(FilterType.Muted) || ex.NextInPipe != null;
         
         List<string> args = ex.Arguments
             .Select(x => x.GetStringRepresentation(_engine))
@@ -48,14 +56,15 @@ public sealed class FileExecutor
             commandName = aliasedName;
         }
 
-        CommandExecution exec = CommandExecution.Create(_engine, commandName, input, args);
+        CommandExecution exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, args);
         exec.Muted = muted;
 
         await exec.Run();
+        _engine.LastCmdExecution = exec;
 
         if (ex.NextInPipe is { } next)
         {
-            if (ex.NextInPipePassStdOutAsArgs)
+            if (ex.Filters.HasFlag(FilterType.PassAsArg))
             {
                 next.Arguments.Add(new NodeString
                 {

@@ -1,16 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using PercentLang.Ast;
 
 namespace PercentLang.Execution;
 
 public abstract class CommandExecution
 {
-    protected CommandExecution(ExecutionEngine engine, string command, string input, List<string> args)
+    protected CommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
     {
         Engine = engine;
         
         CommandName = command;
         Arguments = args;
+
+        Filters = filters;
 
         StdIn = input;
         Out = new StringBuilder();
@@ -26,6 +29,8 @@ public abstract class CommandExecution
     public Exception? RunException { get; private set; }
     
     public List<string> Arguments { get; }
+    
+    public FilterType Filters { get; }
 
     public int ResultCode { get; set; }
     
@@ -36,11 +41,11 @@ public abstract class CommandExecution
     
     public ExecutionEngine Engine { get; }
 
-    public static CommandExecution Create(ExecutionEngine engine, string command, string input, List<string> args)
+    public static CommandExecution Create(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
     {
         return Builtins.Factories.ContainsKey(command)
-            ? new BuiltinCommandExecution(engine, command, input, args)
-            : new ProcessCommandExecution(engine, command, input, args);
+            ? new BuiltinCommandExecution(engine, filters, command, input, args)
+            : new ProcessCommandExecution(engine, filters, command, input, args);
     }
     
     public async Task<bool> Run()
