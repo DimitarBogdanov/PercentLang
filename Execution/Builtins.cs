@@ -53,6 +53,24 @@ public static class Builtins
             cmd.WriteStdOut(last.StdOut);
             cmd.WriteStdErr(last.StdErr);
             cmd.SetResultCode(last.ResultCode);
-        }
+        },
+        
+        ["exit"] = cmd => () =>
+        {
+            string? result = cmd.Arguments.FirstOrDefault();
+            if (result != null)
+            {
+                if (Int32.TryParse(result, out int code))
+                {
+                    Environment.Exit(code);
+                }
+                else
+                {
+                    Environment.Exit(-20250316);
+                }
+            }
+            
+            Environment.Exit(0);
+        },
     };
 }
