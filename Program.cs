@@ -7,11 +7,13 @@ namespace PercentLang;
 
 public static class Program
 {
+    public static bool ShowDiagnostics { get; private set; } = false;
+
     public static async Task Main(string[] args)
     {
         if (args.Length == 0)
         {
-            Console.WriteLine("percent | Usage: % filename");
+            Console.WriteLine("percent | Usage: % filename (--diagnostics)");
             return;
         }
 
@@ -31,26 +33,31 @@ public static class Program
 
         string fileText = await File.ReadAllTextAsync(filePath);
 
+        ShowDiagnostics = args.Contains("--diagnostics");
+
         Tokenizer tok = new(fileText);
         List<Token> tokens = tok.Tokenize();
-
-        foreach (Token t in tokens)
-        {
-            Console.WriteLine($"{t.Line,-2} {t.Type} :: {t.Value}");
-        }
 
         Parser parser = new(tokens);
         NodeFile file = parser.Parse();
 
-        Console.WriteLine($"{parser.Messages.Count} messages");
-        foreach (string msg in parser.Messages)
+        if (ShowDiagnostics)
         {
-            Console.WriteLine(msg);
-        }
+            foreach (Token t in tokens)
+            {
+                Console.WriteLine($"{t.Line,-2} {t.Type} :: {t.Value}");
+            }
+        
+            Console.WriteLine($"{parser.Messages.Count} messages");
+            foreach (string msg in parser.Messages)
+            {
+                Console.WriteLine(msg);
+            }
 
-        if (parser.Messages.Count != 0)
-        {
-            return;
+            if (parser.Messages.Count != 0)
+            {
+                return;
+            }
         }
 
         ExecutionEngine engine = new(file);
