@@ -11,13 +11,24 @@ public static class Program
 
     public static async Task Main(string[] args)
     {
-        if (args.Length == 0)
+        string initFilePath = Path.Combine(Environment.CurrentDirectory, "__init__.%");
+        string filePath = "";
+        if (args.All(x => x.StartsWith("--")))
         {
-            Console.WriteLine("percent | Usage: % filename (--diagnostics)");
-            return;
+            if (!File.Exists(initFilePath))
+            {
+                Console.WriteLine("percent | Usage: % filename (--diagnostics)");
+                return;
+            }
+
+            filePath = initFilePath;
         }
 
-        string filePath = args[0];
+        if (filePath == "")
+        {
+            filePath = args[0];
+        }
+
         if (!File.Exists(filePath))
         {
             if (File.Exists($"{filePath}.%"))
