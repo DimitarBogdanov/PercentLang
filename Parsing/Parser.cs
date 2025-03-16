@@ -91,7 +91,7 @@ public sealed class Parser
             throw new ParseException("Expected expression");
         }
 
-        if (IsPipe() || _tokens.CurrentIs(TokenType.Colon))
+        if (allowCommandExecutions && (IsPipe() || _tokens.CurrentIs(TokenType.Colon)))
         {
             FilterType filters = ParseFiltersIfAny();
             
