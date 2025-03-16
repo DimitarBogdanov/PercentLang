@@ -8,12 +8,30 @@ namespace PercentLang;
 public static class Program
 {
     public static async Task Main(string[] args)
-    { 
-        Tokenizer tok = new(    """
-                                    $Var = ipconfig : muted
-                                    $Res = $Var : as_arg | echo : muted, result
-                                    echo $Res
-                                    """);
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("percent | Usage: % filename");
+            return;
+        }
+
+        string filePath = args[0];
+        if (!File.Exists(filePath))
+        {
+            if (File.Exists($"{filePath}.%"))
+            {
+                filePath += ".%";
+            }
+            else
+            {
+                Console.WriteLine("percent | File not found");
+                return;
+            }
+        }
+
+        string fileText = await File.ReadAllTextAsync(filePath);
+
+        Tokenizer tok = new(fileText);
         List<Token> tokens = tok.Tokenize();
 
         foreach (Token t in tokens)
