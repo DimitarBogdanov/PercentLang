@@ -77,7 +77,7 @@ public sealed class FileExecutor
             {
                 next.Arguments.Add(new NodeString
                 {
-                    Value = exec.StdOut
+                    Value = _engine.GetLastCommandOutputRespectFilters()
                 });
             }
             await ExecCommand(next, exec.StdOut);
