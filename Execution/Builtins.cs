@@ -38,6 +38,21 @@ public static class Builtins
 
             CommandExecution exec = CommandExecution.Create(cmd.Engine, FilterType.StdOut, cmdName, "", args);
             exec.Run().Wait();
+        },
+        
+        ["from_last_cmd"] = cmd => () =>
+        {
+            CommandExecution? last = cmd.Engine.LastCmdExecution;
+            if (last == null)
+            {
+                cmd.SetResultCode(-1);
+                return;
+            }
+
+            cmd.Muted = true;
+            cmd.WriteStdOut(last.StdOut);
+            cmd.WriteStdErr(last.StdErr);
+            cmd.SetResultCode(last.ResultCode);
         }
     };
 }

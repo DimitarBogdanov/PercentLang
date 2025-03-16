@@ -27,6 +27,11 @@ public sealed class BuiltinCommandExecution : CommandExecution
         }
     }
 
+    public void SetResultCode(int code)
+    {
+        ResultCode = code;
+    }
+
     protected override Task RunInternal()
     {
         return Task.Run(Builtins.Factories[CommandName](this));
