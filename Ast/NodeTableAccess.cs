@@ -2,19 +2,18 @@
 
 namespace PercentLang.Ast;
 
-public sealed class NodeTableAccess : Node
+public sealed class NodeTableAccess : NodeVarRef
 {
-    public required NodeVarRef VarRef { get; init; }
-    public required Node       Index  { get; init; }
+    public required Node Index { get; init; }
 
     public override string? GetStringRepresentation(ExecutionEngine engine)
     {
-        Node var = engine.GetVariableValueOrNullNode(VarRef.Name);
+        Node var = engine.GetVariableValueOrNullNode(Name);
         if (var is not NodeTable tbl)
         {
             return null;
         }
-        
+
         string? idx = Index.GetStringRepresentation(engine);
         if (idx == null)
         {

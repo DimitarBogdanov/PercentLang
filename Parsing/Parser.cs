@@ -90,10 +90,6 @@ public sealed class Parser
         else if (IsVarRef())
         {
             returnValue = ParseVarRef();
-            if (_tokens.CurrentIs(TokenType.LBracket))
-            {
-                returnValue = ParseTableAccess((NodeVarRef)returnValue);
-            }
         }
         else
         {
@@ -251,7 +247,7 @@ public sealed class Parser
         Node index = ParseExpr(false);
         _tokens.Advance(); // skip ']'
 
-        return new NodeTableAccess { VarRef = tableRef, Index = index };
+        return new NodeTableAccess { Name = tableRef.Name, Index = index };
     }
     
     private bool IsVarRef()
@@ -265,11 +261,17 @@ public sealed class Parser
         string varName = _tokens.Current().Value[1..];
         
         _tokens.Advance();
-        
-        return new NodeVarRef
+        NodeVarRef value = new NodeVarRef
         {
             Name = varName
         };
+
+        if (_tokens.CurrentIs(TokenType.LBracket))
+        {
+            return ParseTableAccess(value);
+        }
+
+        return value;
     }
 
     private bool IsPipe()
