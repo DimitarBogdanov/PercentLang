@@ -47,4 +47,14 @@ public sealed class ExecutionEngine
 
         return LastCmdExecution.StdOut;
     }
+
+    public Node GetVariableValueOrNullNode(string varName)
+    {
+        if (Variables.TryGetValue(varName, out Node? node))
+        {
+            return node;
+        }
+
+        return Node.Null;
+    }
 }
