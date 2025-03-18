@@ -202,11 +202,27 @@ public sealed class Parser
     {
         _tokens.Advance(); // skip '{'
 
-        List<Node> listValues = [];
+        Dictionary<string, Node> values = [];
+        int listIdx = 0;
         while (!_tokens.CurrentIs(TokenType.RBrace) && !_tokens.IsEof())
         {
-            Node value = ParseExpr(false);
-            listValues.Add(value);
+            if (_tokens.CurrentIs(TokenType.String) && _tokens.Peek().Type == TokenType.OpSet)
+            {
+                // dict value
+                string key = _tokens.Current().Value;
+                _tokens.Advance(); // skip key
+                _tokens.Advance(); // skip value
+                Node value = ParseExpr(false);
+
+                values[key] = value;
+            }
+            else
+            {
+                Node value = ParseExpr(false);
+                values[listIdx.ToString()] = value;
+                listIdx++;
+            }
+            
 
             if (_tokens.CurrentIs(TokenType.Comma))
             {
@@ -224,7 +240,7 @@ public sealed class Parser
         }
 
         NodeTable res = new();
-        res.InitList(listValues);
+        res.Init(values);
 
         return res;
     }

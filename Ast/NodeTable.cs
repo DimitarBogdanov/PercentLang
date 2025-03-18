@@ -9,11 +9,11 @@ public sealed class NodeTable : Node
     
     private readonly Dictionary<string, Node> _values;
 
-    public void InitList(List<Node> values)
+    public void Init(Dictionary<string, Node> values)
     {
-        for (int i = 0; i < values.Count; i++)
+        foreach (KeyValuePair<string,Node> pair in values)
         {
-            _values[i.ToString()] = values[i];
+            _values.Add(pair.Key, pair.Value);
         }
     }
 
