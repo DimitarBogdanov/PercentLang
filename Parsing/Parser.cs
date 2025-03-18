@@ -67,6 +67,10 @@ public sealed class Parser
         {
             returnValue = ParseString();
         }
+        else if (IsTable())
+        {
+            returnValue = ParseTable();
+        }
         else if (IsNameRef())
         {
             if (allowCommandExecutions)
@@ -76,6 +80,7 @@ public sealed class Parser
             else
             {
                 string nameRef = ParseNameRef();
+                
                 returnValue = new NodeString
                 {
                     Value = nameRef
@@ -85,6 +90,10 @@ public sealed class Parser
         else if (IsVarRef())
         {
             returnValue = ParseVarRef();
+            if (_tokens.CurrentIs(TokenType.LBracket))
+            {
+                returnValue = ParseTableAccess((NodeVarRef)returnValue);
+            }
         }
         else
         {
@@ -184,6 +193,51 @@ public sealed class Parser
         };
     }
 
+    private bool IsTable()
+    {
+        return _tokens.CurrentIs(TokenType.LBrace);
+    }
+
+    private NodeTable ParseTable()
+    {
+        _tokens.Advance(); // skip '{'
+
+        List<Node> listValues = [];
+        while (!_tokens.CurrentIs(TokenType.RBrace) && !_tokens.IsEof())
+        {
+            Node value = ParseExpr(false);
+            listValues.Add(value);
+
+            if (_tokens.CurrentIs(TokenType.Comma))
+            {
+                _tokens.Advance();
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (_tokens.CurrentIs(TokenType.RBrace))
+        {
+            _tokens.Advance();
+        }
+
+        NodeTable res = new();
+        res.InitList(listValues);
+
+        return res;
+    }
+
+    private NodeTableAccess ParseTableAccess(NodeVarRef tableRef)
+    {
+        _tokens.Advance(); // skip '['
+        Node index = ParseExpr(false);
+        _tokens.Advance(); // skip ']'
+
+        return new NodeTableAccess { VarRef = tableRef, Index = index };
+    }
+    
     private bool IsVarRef()
     {
         return _tokens.CurrentIs(TokenType.Default)
