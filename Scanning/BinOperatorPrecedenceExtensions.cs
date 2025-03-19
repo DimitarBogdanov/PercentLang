@@ -10,6 +10,8 @@ public static class BinOperatorPrecedenceExtensions
             BinOperatorType.Mul or BinOperatorType.Div or BinOperatorType.Mod => 1,
             BinOperatorType.Lt or BinOperatorType.Gt or BinOperatorType.Eq
                 or BinOperatorType.Leq or BinOperatorType.Geq => 2,
+            BinOperatorType.And => 3,
+            BinOperatorType.Or => 4,
             
             _ => throw new ArgumentOutOfRangeException(nameof(binOp), "Unknown binary operator")
         };

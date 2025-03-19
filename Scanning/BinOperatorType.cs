@@ -3,12 +3,19 @@
 public enum BinOperatorType
 {
     None,
+    
+    And,
+    Or,
+    Xor,
+    
     Concat,
+    
     Add,
     Sub,
     Mul,
     Div,
     Mod,
+    
     Lt,
     Gt,
     Leq,

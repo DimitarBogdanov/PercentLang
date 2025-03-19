@@ -20,6 +20,36 @@ public sealed class NodeBinaryOp : Node
                 string rhs = Rhs.GetStringRepresentation(engine);
                 return new NodeString { Value = lhs + rhs };
             }
+            
+            case BinOperatorType.Xor:
+            {
+                if (Lhs.IsTruthy(engine) ^ Rhs.IsTruthy(engine))
+                {
+                    return True;
+                }
+
+                return False;
+            }
+
+            case BinOperatorType.And:
+            {
+                if (Lhs.IsTruthy(engine) && Rhs.IsTruthy(engine))
+                {
+                    return True;
+                }
+
+                return False;
+            }
+
+            case BinOperatorType.Or:
+            {
+                if (Lhs.IsTruthy(engine) || Rhs.IsTruthy(engine))
+                {
+                    return True;
+                }
+
+                return False;
+            }
 
             case BinOperatorType.Add:
             {

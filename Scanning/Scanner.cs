@@ -119,6 +119,20 @@ public sealed class Scanner
                     case '}':
                         PushTok(TokenType.RBrace, "}");
                         continue;
+                    
+                    case '^':
+                        PushBinOpTok(BinOperatorType.Xor, "^");
+                        continue;
+                    
+                    case '&' when next is '&':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.And, "&&");
+                        continue;
+                    
+                    case '|' when next is '|':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Or, "||");
+                        continue;
 
                     case '=' when next is '=':
                         _pos++;
