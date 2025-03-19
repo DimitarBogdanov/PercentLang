@@ -147,6 +147,10 @@ public sealed class Parser
         {
             returnValue = ParseVarRef();
         }
+        else if (IsNegateNumber())
+        {
+            returnValue = ParseNegateNumber();
+        }
         else
         {
             throw new ParseException("Expected expression");
@@ -504,6 +508,18 @@ public sealed class Parser
         {
             Value = val
         };
+    }
+
+    private bool IsNegateNumber()
+    {
+        return _tokens.Current().BinOperatorType == BinOperatorType.Sub;
+    }
+
+    private NodeNegateNumber ParseNegateNumber()
+    {
+        _tokens.Advance(); // skip '-'
+        Node value = ParseExprPrimary();
+        return new NodeNegateNumber { InnerValue = value };
     }
 
     private bool IsTable()
