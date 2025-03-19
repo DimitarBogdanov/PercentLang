@@ -63,6 +63,11 @@ public sealed class Parser
             return ParseWhile();
         }
 
+        if (IsRepeat())
+        {
+            return ParseRepeat();
+        }
+
         if (IsFor())
         {
             return ParseFor();
@@ -294,6 +299,44 @@ public sealed class Parser
         _loopDepth--;
 
         return new NodeWhile { Condition = condition, Body = body };
+    }
+    
+    private bool IsRepeat()
+    {
+        return _tokens.CurrentIs(TokenType.KwRepeat);
+    }
+
+    private NodeWhile ParseRepeat()
+    {
+        int line = _tokens.CurrentLine();
+        _tokens.Advance(); // skip 'repeat'
+
+        if (!_tokens.CurrentIs(TokenType.LBrace))
+        {
+            throw new ParseException("Expected repeat body");
+        }
+
+        _loopDepth++;
+        List<Node> body = ParseInstructionBlock();
+        _loopDepth--;
+        
+        if (!_tokens.CurrentIs(TokenType.KwUntil))
+        {
+            throw new ParseException($"Expected 'until' (for 'repeat' on line {line})");
+        }
+        
+        _tokens.Advance(); // skip 'until'
+
+        Node condition = ParseExpr(false);
+
+        body.Add(
+            new NodeIf
+            {
+                Main = new NodeIf.Branch(condition, [ new NodeBreakLoop() ])
+            }
+        );
+
+        return new NodeWhile { Condition = Node.True, Body = body };
     }
 
     private bool IsFor()

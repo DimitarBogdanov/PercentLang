@@ -254,6 +254,7 @@ public sealed class Scanner
                     "elseif" => TokenType.KwElseIf,
                     "while"  => TokenType.KwWhile,
                     "for"    => TokenType.KwFor,
+                    "repeat" => TokenType.KwRepeat,
                     "until"  => TokenType.KwUntil,
                     "break"  => TokenType.KwBreak,
 

@@ -23,6 +23,7 @@ public enum TokenType
     KwElseIf,
     KwWhile,
     KwFor,
+    KwRepeat,
     KwUntil,
     KwBreak,
     
