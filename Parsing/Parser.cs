@@ -10,15 +10,15 @@ public sealed class Parser
     public Parser(List<Token> tokens)
     {
         _tokens = new TokenReaderUtil(tokens);
-        Messages = new List<string>();
+        _blockStack = [];
         
-        _file = new NodeFile();
+        Messages = new List<string>();
     }
 
     public List<string> Messages { get; }
 
     private readonly TokenReaderUtil _tokens;
-    private readonly NodeFile _file;
+    private readonly Stack<List<Node>> _blockStack;
 
     private int _loopDepth;
     private int _commandExecWrapperDepth;
@@ -26,12 +26,14 @@ public sealed class Parser
 
     public NodeFile Parse()
     {
+        NodeFile file = new NodeFile();
+        _blockStack.Push(file.Commands);
         while (!_tokens.IsEof())
         {
             try
             {
                 Node line = ParseLine();
-                _file.Commands.Add(line);
+                file.Commands.Add(line);
             }
             catch (ParseException ex)
             {
@@ -40,7 +42,9 @@ public sealed class Parser
             }
         }
 
-        return _file;
+        _blockStack.Pop();
+
+        return file;
     }
 
     private Node ParseLine()
@@ -207,9 +211,10 @@ public sealed class Parser
 
         string varName = $"!CmdWrapper_{Guid.NewGuid().ToString()}";
         NodeVarRef varRef = new NodeVarRef { Name = varName };
-        
-        _file.Commands.Add(exec);
-        _file.Commands.Add(new NodeVarAssign
+
+        List<Node> currentBlock = _blockStack.Peek();
+        currentBlock.Add(exec);
+        currentBlock.Add(new NodeVarAssign
         {
             Var = varRef,
             Value = new NodeCommandExecution
@@ -471,11 +476,13 @@ public sealed class Parser
         _tokens.Advance(); // skip '{'
 
         List<Node> res = [];
+        _blockStack.Push(res);
         while (!_tokens.IsEof() && !_tokens.CurrentIs(TokenType.RBrace))
         {
             Node line = ParseLine();
             res.Add(line);
         }
+        _blockStack.Pop();
         
         _tokens.Advance(); // skip '}'
         return res;
