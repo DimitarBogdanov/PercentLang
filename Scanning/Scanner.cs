@@ -7,6 +7,7 @@ public sealed class Scanner
     private enum State
     {
         Default,
+        DefaultEscaped,
         String,
     }
 
@@ -56,6 +57,10 @@ public sealed class Scanner
             if (current == '\\')
             {
                 isEscape = true;
+                if (_value.Length == 0)
+                {
+                    _state = State.DefaultEscaped;
+                }
                 continue;
             }
 
@@ -229,7 +234,7 @@ public sealed class Scanner
             _ => TokenType.Default
         };
 
-        if (t == TokenType.Default)
+        if (t == TokenType.Default && _state != State.DefaultEscaped)
         {
             t = trimmedVal switch
             {
