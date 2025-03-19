@@ -236,17 +236,24 @@ public sealed class Scanner
 
         if (t == TokenType.Default && _state != State.DefaultEscaped)
         {
-            t = trimmedVal switch
+            if (Double.TryParse(trimmedVal, out _))
             {
-                "if"     => TokenType.KwIf,
-                "else"   => TokenType.KwElse,
-                "elseif" => TokenType.KwElseIf,
-                "while"  => TokenType.KwWhile,
-                "for"    => TokenType.KwFor,
-                "until"  => TokenType.KwUntil,
-                
-                _ => TokenType.Default
-            };
+                t = TokenType.String;
+            }
+            else
+            {
+                t = trimmedVal switch
+                {
+                    "if"     => TokenType.KwIf,
+                    "else"   => TokenType.KwElse,
+                    "elseif" => TokenType.KwElseIf,
+                    "while"  => TokenType.KwWhile,
+                    "for"    => TokenType.KwFor,
+                    "until"  => TokenType.KwUntil,
+
+                    _ => TokenType.Default
+                };
+            }
         }
 
         PushTok(t);
