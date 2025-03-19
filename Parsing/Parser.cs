@@ -159,6 +159,21 @@ public sealed class Parser
         {
             returnValue = ParseFlipBool();
         }
+        else if (_tokens.CurrentIs(TokenType.KwNull))
+        {
+            _tokens.Advance();
+            returnValue = Node.Null;
+        }
+        else if (_tokens.CurrentIs(TokenType.KwTrue))
+        {
+            _tokens.Advance();
+            returnValue = Node.True;
+        }
+        else if (_tokens.CurrentIs(TokenType.KwFalse))
+        {
+            _tokens.Advance();
+            returnValue = Node.False;
+        }
         else
         {
             throw new ParseException("Expected expression");

@@ -22,7 +22,7 @@ public abstract class Node
     {
         return this == False
                || this == Null
-               || GetStringRepresentation(engine) is "FALSE" or "";
+               || GetStringRepresentation(engine).ToUpperInvariant() is "FALSE" or "";
     }
 
     public virtual IEnumerable<Node> GetExplodedVersion()

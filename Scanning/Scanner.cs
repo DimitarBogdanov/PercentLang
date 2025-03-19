@@ -285,6 +285,10 @@ public sealed class Scanner
                     "until"  => TokenType.KwUntil,
                     "break"  => TokenType.KwBreak,
 
+                    "null"  => TokenType.KwNull,
+                    "true"  => TokenType.KwTrue,
+                    "false" => TokenType.KwFalse,
+
                     _ => TokenType.Default
                 };
             }

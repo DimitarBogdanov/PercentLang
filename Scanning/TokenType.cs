@@ -28,6 +28,9 @@ public enum TokenType
     KwRepeat,
     KwUntil,
     KwBreak,
+    KwNull,
+    KwTrue,
+    KwFalse,
     
     Eof
 }
