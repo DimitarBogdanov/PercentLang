@@ -81,7 +81,7 @@ public sealed class FileExecutor
                 }
                 else
                 {
-                    value = nva.Value;
+                    value = new NodeString { Value = nva.Value.GetStringRepresentation(_engine) };
                 }
 
                 if (nva.Var is NodeTableAccess tableAccess)
