@@ -121,18 +121,18 @@ public sealed class Scanner
                 
                 case '<' when next is '=':
                     _pos++;
-                    PushTok(TokenType.OpLeq, "<=");
+                    PushBinOpTok(BinOperatorType.Leq, "<=");
                     continue;
                 case '<':
-                    PushTok(TokenType.OpLt, "<");
+                    PushBinOpTok(BinOperatorType.Lt, "<");
                     continue;
                 
                 case '>' when next is '=':
                     _pos++;
-                    PushTok(TokenType.OpGeq, ">=");
+                    PushBinOpTok(BinOperatorType.Geq, ">=");
                     continue;
                 case '>':
-                    PushTok(TokenType.OpGt, ">");
+                    PushBinOpTok(BinOperatorType.Gt, ">");
                     continue;
                 
                 case ',':
@@ -140,23 +140,23 @@ public sealed class Scanner
                     continue;
                 
                 case '+':
-                    PushTok(TokenType.OpAdd, "+");
+                    PushBinOpTok(BinOperatorType.Add, "+");
                     continue;
                 
                 case '-':
-                    PushTok(TokenType.OpSub, "-");
+                    PushBinOpTok(BinOperatorType.Sub, "-");
                     continue;
                 
                 case '*':
-                    PushTok(TokenType.OpMul, "*");
+                    PushBinOpTok(BinOperatorType.Mul, "*");
                     continue;
                 
                 case '/':
-                    PushTok(TokenType.OpDiv, "/");
+                    PushBinOpTok(BinOperatorType.Div, "/");
                     continue;
                 
                 case '%':
-                    PushTok(TokenType.OpMod, "%");
+                    PushBinOpTok(BinOperatorType.Mod, "%");
                     continue;
                 
                 case '|':
@@ -183,7 +183,7 @@ public sealed class Scanner
     private void PushTok(TokenType type)
     {
         string value = _value.ToString().Trim();
-        _tokens.AddLast(new Token(value, type, _line));
+        _tokens.AddLast(new Token(value, type, _line, BinOperatorType.None));
 
         _value.Clear();
     }
@@ -197,6 +197,16 @@ public sealed class Scanner
 
         _value.Append(expressValue);
         PushTok(type);
+    }
+
+    private void PushBinOpTok(BinOperatorType type, string value)
+    {
+        if (_value.Length != 0)
+        {
+            PushTokInferType();
+        }
+
+        _tokens.AddLast(new Token(value, TokenType.OpBinary, _line, type));
     }
 
     private void PushTokInferType()

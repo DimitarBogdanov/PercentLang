@@ -8,11 +8,7 @@ public enum TokenType
     Comma,
     Pipe,
     Colon,
-    OpAdd,
-    OpSub,
-    OpMul,
-    OpDiv,
-    OpMod,
+    OpBinary,
     
     LParen,
     RParen,
@@ -23,10 +19,6 @@ public enum TokenType
     
     OpSet,
     OpEq,
-    OpLt,
-    OpLeq,
-    OpGt,
-    OpGeq,
     
     KwIf,
     KwElse,
