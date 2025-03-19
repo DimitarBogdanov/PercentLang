@@ -92,89 +92,94 @@ public sealed class Scanner
                 continue;
             }
 
-            char next = PeekChar(1);
-            switch (current)
+            // If a default token is escaped, don't look for punctuation within it
+            // This allows the user to write e.g.  \g++ instead of g\+\+
+            if (_state != State.DefaultEscaped)
             {
-                case '(':
-                    PushTok(TokenType.LParen, "(");
-                    continue;
-                case ')':
-                    PushTok(TokenType.RParen, ")");
-                    continue;
-                
-                case '[':
-                    PushTok(TokenType.LBracket, "[");
-                    continue;
-                case ']':
-                    PushTok(TokenType.RBracket, "]");
-                    continue;
-                
-                case '{':
-                    PushTok(TokenType.LBrace, "{");
-                    continue;
-                case '}':
-                    PushTok(TokenType.RBrace, "}");
-                    continue;
-                
-                case '=' when next is '=':
-                    _pos++;
-                    PushBinOpTok(BinOperatorType.Eq, "==");
-                    continue;
-                case '=':
-                    PushTok(TokenType.OpSet, "=");
-                    continue;
-                
-                case '<' when next is '=':
-                    _pos++;
-                    PushBinOpTok(BinOperatorType.Leq, "<=");
-                    continue;
-                case '<':
-                    PushBinOpTok(BinOperatorType.Lt, "<");
-                    continue;
-                
-                case '>' when next is '=':
-                    _pos++;
-                    PushBinOpTok(BinOperatorType.Geq, ">=");
-                    continue;
-                case '>':
-                    PushBinOpTok(BinOperatorType.Gt, ">");
-                    continue;
-                
-                case ',':
-                    PushTok(TokenType.Comma, ",");
-                    continue;
-                
-                case '+' when next is '+':
-                    _pos++;
-                    PushBinOpTok(BinOperatorType.Concat, "++");
-                    continue;
-                case '+':
-                    PushBinOpTok(BinOperatorType.Add, "+");
-                    continue;
-                
-                case '-':
-                    PushBinOpTok(BinOperatorType.Sub, "-");
-                    continue;
-                
-                case '*':
-                    PushBinOpTok(BinOperatorType.Mul, "*");
-                    continue;
-                
-                case '/':
-                    PushBinOpTok(BinOperatorType.Div, "/");
-                    continue;
-                
-                case '%':
-                    PushBinOpTok(BinOperatorType.Mod, "%");
-                    continue;
-                
-                case '|':
-                    PushTok(TokenType.Pipe, "|");
-                    continue;
-                
-                case ':':
-                    PushTok(TokenType.Colon, ":");
-                    continue;
+                char next = PeekChar(1);
+                switch (current)
+                {
+                    case '(':
+                        PushTok(TokenType.LParen, "(");
+                        continue;
+                    case ')':
+                        PushTok(TokenType.RParen, ")");
+                        continue;
+
+                    case '[':
+                        PushTok(TokenType.LBracket, "[");
+                        continue;
+                    case ']':
+                        PushTok(TokenType.RBracket, "]");
+                        continue;
+
+                    case '{':
+                        PushTok(TokenType.LBrace, "{");
+                        continue;
+                    case '}':
+                        PushTok(TokenType.RBrace, "}");
+                        continue;
+
+                    case '=' when next is '=':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Eq, "==");
+                        continue;
+                    case '=':
+                        PushTok(TokenType.OpSet, "=");
+                        continue;
+
+                    case '<' when next is '=':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Leq, "<=");
+                        continue;
+                    case '<':
+                        PushBinOpTok(BinOperatorType.Lt, "<");
+                        continue;
+
+                    case '>' when next is '=':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Geq, ">=");
+                        continue;
+                    case '>':
+                        PushBinOpTok(BinOperatorType.Gt, ">");
+                        continue;
+
+                    case ',':
+                        PushTok(TokenType.Comma, ",");
+                        continue;
+
+                    case '+' when next is '+':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Concat, "++");
+                        continue;
+                    case '+':
+                        PushBinOpTok(BinOperatorType.Add, "+");
+                        continue;
+
+                    case '-':
+                        PushBinOpTok(BinOperatorType.Sub, "-");
+                        continue;
+
+                    case '*':
+                        PushBinOpTok(BinOperatorType.Mul, "*");
+                        continue;
+
+                    case '/':
+                        PushBinOpTok(BinOperatorType.Div, "/");
+                        continue;
+
+                    case '%':
+                        PushBinOpTok(BinOperatorType.Mod, "%");
+                        continue;
+
+                    case '|':
+                        PushTok(TokenType.Pipe, "|");
+                        continue;
+
+                    case ':':
+                        PushTok(TokenType.Colon, ":");
+                        continue;
+                }
             }
 
             _value.Append(current);
