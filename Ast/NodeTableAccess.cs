@@ -29,6 +29,6 @@ public sealed class NodeTableAccess : NodeVarRef
         
         string idx = Index.GetStringRepresentation(engine);
 
-        tbl.SetValue(idx, value);
+        tbl.SetValue(engine, idx, value);
     }
 }

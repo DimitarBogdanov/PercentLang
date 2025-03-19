@@ -18,7 +18,7 @@ public class NodeVarRef : Node
 
     public virtual void SetValue(ExecutionEngine engine, Node value)
     {
-        if (value == Null)
+        if (value.IsNull(engine))
         {
             engine.Variables.Remove(Name);
             return;

@@ -25,9 +25,9 @@ public sealed class NodeTable : Node
         return _values.GetValueOrDefault(index, Null);
     }
 
-    public void SetValue(string index, Node value)
+    public void SetValue(ExecutionEngine engine, string index, Node value)
     {
-        if (value == Null)
+        if (value.IsNull(engine))
         {
             _values.Remove(index);
             return;

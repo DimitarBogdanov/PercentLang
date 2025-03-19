@@ -20,9 +20,18 @@ public abstract class Node
 
     public bool IsFalsy(ExecutionEngine engine)
     {
-        return this == False
-               || this == Null
-               || GetStringRepresentation(engine).ToUpperInvariant() is "FALSE" or "";
+        return IsNull(engine)
+               || IsFalseStrong(engine);
+    }
+
+    public bool IsNull(ExecutionEngine engine)
+    {
+        return GetStringRepresentation(engine) is "";
+    }
+
+    public bool IsFalseStrong(ExecutionEngine engine)
+    {
+        return GetStringRepresentation(engine).ToUpper() == "FALSE";
     }
 
     public virtual IEnumerable<Node> GetExplodedVersion()
