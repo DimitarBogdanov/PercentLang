@@ -144,8 +144,6 @@ public sealed class FileExecutor
         {
             List<string> args = ex.Arguments
                 .Select(x => x.GetStringRepresentation(_engine))
-                .Where(x => x is not null)
-                .Select(x => x!)
                 .ToList();
 
             string commandName = ex.CommandName;
