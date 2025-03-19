@@ -3,6 +3,7 @@
 public enum BinOperatorType
 {
     None,
+    Concat,
     Add,
     Sub,
     Mul,
@@ -11,5 +12,6 @@ public enum BinOperatorType
     Lt,
     Gt,
     Leq,
-    Geq
+    Geq,
+    Eq
 }

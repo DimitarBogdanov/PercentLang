@@ -58,17 +58,21 @@ public static class Program
             {
                 Console.WriteLine($"{t.Line,-2} {t.Type} :: {t.Value}");
             }
-        
-            Console.WriteLine($"{parser.Messages.Count} messages");
-            foreach (string msg in parser.Messages)
-            {
-                Console.WriteLine(msg);
-            }
 
             if (parser.Messages.Count != 0)
             {
                 return;
             }
+        }
+
+        if (parser.Messages.Count != 0)
+        {
+            Console.WriteLine($"{parser.Messages.Count} messages");
+        }
+
+        foreach (string msg in parser.Messages)
+        {
+            Console.WriteLine(msg);
         }
 
         ExecutionEngine engine = new(file);

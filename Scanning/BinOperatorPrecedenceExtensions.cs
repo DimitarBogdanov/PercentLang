@@ -6,9 +6,10 @@ public static class BinOperatorPrecedenceExtensions
     {
         return binOp switch
         {
-            BinOperatorType.Add or BinOperatorType.Sub => 0,
+            BinOperatorType.Add or BinOperatorType.Sub or BinOperatorType.Concat => 0,
             BinOperatorType.Mul or BinOperatorType.Div or BinOperatorType.Mod => 1,
-            BinOperatorType.Lt or BinOperatorType.Gt or BinOperatorType.Leq or BinOperatorType.Geq => 2,
+            BinOperatorType.Lt or BinOperatorType.Gt or BinOperatorType.Eq
+                or BinOperatorType.Leq or BinOperatorType.Geq => 2,
             
             _ => throw new ArgumentOutOfRangeException(nameof(binOp), "Unknown binary operator")
         };

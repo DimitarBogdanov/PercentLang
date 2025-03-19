@@ -6,7 +6,7 @@ public class NodeVarRef : Node
 {
     public required string Name { get; init; }
 
-    public override string? GetStringRepresentation(ExecutionEngine engine)
+    public override string GetStringRepresentation(ExecutionEngine engine)
     {
         return engine
             .GetVariableValueOrNullNode(Name)

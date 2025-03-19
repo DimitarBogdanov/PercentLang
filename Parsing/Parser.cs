@@ -80,7 +80,6 @@ public sealed class Parser
             {
                 rhs = ParseExprRhs(rhs, op.GetPrecedence() + 1, allowCommandExecutions);
                 lookahead = _tokens.Current();
-                _tokens.Advance();
             }
 
             lhs = new NodeBinaryOp { Op = op, Lhs = lhs, Rhs = rhs };

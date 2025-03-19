@@ -113,7 +113,7 @@ public sealed class Scanner
                 
                 case '=' when next is '=':
                     _pos++;
-                    PushTok(TokenType.OpEq, "==");
+                    PushBinOpTok(BinOperatorType.Eq, "==");
                     continue;
                 case '=':
                     PushTok(TokenType.OpSet, "=");
@@ -157,6 +157,10 @@ public sealed class Scanner
                 
                 case '%':
                     PushBinOpTok(BinOperatorType.Mod, "%");
+                    continue;
+                
+                case '.':
+                    PushBinOpTok(BinOperatorType.Concat, ".");
                     continue;
                 
                 case '|':
