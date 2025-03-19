@@ -8,6 +8,7 @@ public enum TokenType
     Comma,
     Pipe,
     Colon,
+    OpSet,
     OpBinary,
     
     LParen,
@@ -16,9 +17,6 @@ public enum TokenType
     RBracket,
     LBrace,
     RBrace,
-    
-    OpSet,
-    OpEq,
     
     KwIf,
     KwElse,
