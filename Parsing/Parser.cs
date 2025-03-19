@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using PercentLang.Ast;
 using PercentLang.Execution;
-using PercentLang.Tokenizing;
+using PercentLang.Scanning;
 
 namespace PercentLang.Parsing;
 

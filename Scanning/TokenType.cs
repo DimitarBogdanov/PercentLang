@@ -1,4 +1,4 @@
-﻿namespace PercentLang.Tokenizing;
+﻿namespace PercentLang.Scanning;
 
 public enum TokenType
 {

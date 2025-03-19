@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace PercentLang.Tokenizing;
+namespace PercentLang.Scanning;
 
-public sealed class Tokenizer
+public sealed class Scanner
 {
     private enum State
     {
@@ -10,7 +10,7 @@ public sealed class Tokenizer
         String,
     }
 
-    public Tokenizer(string input)
+    public Scanner(string input)
     {
         _tokens = new LinkedList<Token>();
         _value = new StringBuilder();

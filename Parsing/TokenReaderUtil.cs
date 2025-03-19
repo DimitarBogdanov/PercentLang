@@ -1,4 +1,4 @@
-﻿using PercentLang.Tokenizing;
+﻿using PercentLang.Scanning;
 
 namespace PercentLang.Parsing;
 

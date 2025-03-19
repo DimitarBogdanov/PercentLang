@@ -1,7 +1,7 @@
 ﻿using PercentLang.Ast;
 using PercentLang.Execution;
 using PercentLang.Parsing;
-using PercentLang.Tokenizing;
+using PercentLang.Scanning;
 
 namespace PercentLang;
 
@@ -46,8 +46,8 @@ public static class Program
 
         ShowDiagnostics = args.Contains("--diagnostics");
 
-        Tokenizer tok = new(fileText);
-        List<Token> tokens = tok.Tokenize();
+        Scanner scanner = new(fileText);
+        List<Token> tokens = scanner.Tokenize();
 
         Parser parser = new(tokens);
         NodeFile file = parser.Parse();
