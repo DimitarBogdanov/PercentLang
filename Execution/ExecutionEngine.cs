@@ -10,6 +10,9 @@ public sealed class ExecutionEngine
         
         Variables = new Dictionary<string, Node>();
         Aliases = new Dictionary<string, string>();
+        Libraries = new List<Library>();
+        
+        LibraryStandardInjector.Inject(this);
     }
     
     public NodeFile File { get; }
@@ -17,6 +20,8 @@ public sealed class ExecutionEngine
     public Dictionary<string, Node> Variables { get; }
     
     public Dictionary<string, string> Aliases { get; }
+    
+    public List<Library> Libraries { get; }
     
     public CommandExecution? LastCmdExecution { get; set; }
 

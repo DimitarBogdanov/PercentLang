@@ -43,9 +43,22 @@ public abstract class CommandExecution
 
     public static CommandExecution Create(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
     {
-        return Builtins.Factories.ContainsKey(command)
-            ? new BuiltinCommandExecution(engine, filters, command, input, args)
-            : new ProcessCommandExecution(engine, filters, command, input, args);
+        if (Builtins.Factories.ContainsKey(command))
+        {
+            return new BuiltinCommandExecution(engine, filters, command, input, args);
+        }
+        else if (command.StartsWith("Lib."))
+        {
+            string[] parts = command.Split('.', 3);
+            string libName = parts[1];
+            string cmdName = parts[2];
+
+            return new LibraryCommandExecution(engine, filters, libName, cmdName, input, args);
+        }
+        else
+        {
+            return new ProcessCommandExecution(engine, filters, command, input, args);
+        }
     }
     
     public async Task<bool> Run()
