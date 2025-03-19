@@ -83,30 +83,59 @@ public sealed class NodeBinaryOp : Node
             
             case BinOperatorType.Lt:
             {
-                break;
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return left < right ? True : False;
+                }
+
+                throw new ExecutionException("Math operators require two numbers on both sides");
             }
             
             case BinOperatorType.Gt:
             {
-                break;
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return left > right ? True : False;
+                }
+
+                throw new ExecutionException("Math operators require two numbers on both sides");
             }
             
             case BinOperatorType.Leq:
             {
-                break;
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return left <= right ? True : False;
+                }
+
+                throw new ExecutionException("Math operators require two numbers on both sides");
             }
             
             case BinOperatorType.Geq:
             {
-                break;
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return left >= right ? True : False;
+                }
+
+                throw new ExecutionException("Math operators require two numbers on both sides");
             }
+
+            case BinOperatorType.Eq:
+            {
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return Math.Abs(left - right) < 0.05 ? True : False;
+                }
+
+                return Lhs.GetStringRepresentation(engine) == Rhs.GetStringRepresentation(engine) ? True : False;
+            }
+
 
             case BinOperatorType.None:
             default:
                 throw new ArgumentOutOfRangeException(nameof(Op));
         }
-
-        throw new NotImplementedException();
     }
 
     public override string GetStringRepresentation(ExecutionEngine engine)
