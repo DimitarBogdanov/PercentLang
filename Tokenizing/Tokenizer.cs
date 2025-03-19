@@ -75,6 +75,12 @@ public sealed class Tokenizer
                 continue;
             }
 
+            if (_state == State.String)
+            {
+                _value.Append(current);
+                continue;
+            }
+
             if (Char.IsWhiteSpace(current))
             {
                 PushTokInferType();
