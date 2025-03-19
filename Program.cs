@@ -58,14 +58,13 @@ public static class Program
             {
                 Console.WriteLine($"{t.Line,-2} {t.Type} :: {t.Value}");
             }
-
-            if (parser.Messages.Count != 0)
-            {
-                return;
-            }
         }
 
-        if (parser.Messages.Count != 0)
+        if (parser.Messages.Count == 1)
+        {
+            Console.WriteLine("1 message");
+        }
+        else if (parser.Messages.Count != 0)
         {
             Console.WriteLine($"{parser.Messages.Count} messages");
         }
