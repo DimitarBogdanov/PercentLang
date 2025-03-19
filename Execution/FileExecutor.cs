@@ -101,6 +101,10 @@ public sealed class FileExecutor
                     await ExecCommand(nce);
                     value = new NodeString { Value = _engine.GetLastCommandOutputRespectFilters() };
                 }
+                else if (nva.Value is NodeTable)
+                {
+                    value = nva.Value;
+                }
                 else
                 {
                     value = new NodeString { Value = nva.Value.GetStringRepresentation(_engine) };
