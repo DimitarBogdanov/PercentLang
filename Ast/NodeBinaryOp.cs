@@ -28,7 +28,7 @@ public sealed class NodeBinaryOp : Node
                     return new NodeString { Value = (left + right).ToString(CultureInfo.InvariantCulture) };
                 }
 
-                throw new ExecutionException("Math operators require two numbers on both sides");
+                throw new ExecutionException("Addition requires two numbers on both sides");
             }
 
             case BinOperatorType.Sub:
@@ -38,7 +38,7 @@ public sealed class NodeBinaryOp : Node
                     return new NodeString { Value = (left - right).ToString(CultureInfo.InvariantCulture) };
                 }
 
-                throw new ExecutionException("Math operators require two numbers on both sides");
+                throw new ExecutionException("Subtraction requires two numbers on both sides");
             }
             
             case BinOperatorType.Mul:
@@ -48,7 +48,7 @@ public sealed class NodeBinaryOp : Node
                     return new NodeString { Value = (left * right).ToString(CultureInfo.InvariantCulture) };
                 }
 
-                throw new ExecutionException("Math operators require two numbers on both sides");
+                throw new ExecutionException("Multiplication requires two numbers on both sides");
             }
             
             case BinOperatorType.Div:
@@ -63,7 +63,7 @@ public sealed class NodeBinaryOp : Node
                     return new NodeString { Value = (left / right).ToString(CultureInfo.InvariantCulture) };
                 }
 
-                throw new ExecutionException("Math operators require two numbers on both sides");
+                throw new ExecutionException("Division requires two numbers on both sides");
             }
             
             case BinOperatorType.Mod:
@@ -78,7 +78,7 @@ public sealed class NodeBinaryOp : Node
                     return new NodeString { Value = (left % right).ToString(CultureInfo.InvariantCulture) };
                 }
 
-                throw new ExecutionException("Math operators require two numbers on both sides");
+                throw new ExecutionException("Modulo requires two numbers on both sides");
             }
             
             case BinOperatorType.Lt:

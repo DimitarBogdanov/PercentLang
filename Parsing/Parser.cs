@@ -45,7 +45,7 @@ public sealed class Parser
         _currentLine = _tokens.CurrentLine();
         if (IsVarAssign())
         {
-            return ParseVarAssign();
+            return ParseVarAssign(true);
         }
         
         if (IsNameRef())
@@ -61,6 +61,11 @@ public sealed class Parser
         if (IsWhile())
         {
             return ParseWhile();
+        }
+
+        if (IsFor())
+        {
+            return ParseFor();
         }
 
         if (IsBreak())
@@ -205,11 +210,11 @@ public sealed class Parser
         });
     }
 
-    private NodeVarAssign ParseVarAssign()
+    private NodeVarAssign ParseVarAssign(bool allowCommandExecutions)
     {
         NodeVarRef var = ParseVarRef();
         _tokens.Advance(); // skip '='
-        Node value = ParseExpr(true);
+        Node value = ParseExpr(allowCommandExecutions);
 
         return new NodeVarAssign
         {
@@ -289,6 +294,75 @@ public sealed class Parser
         _loopDepth--;
 
         return new NodeWhile { Condition = condition, Body = body };
+    }
+
+    private bool IsFor()
+    {
+        return _tokens.CurrentIs(TokenType.KwFor);
+    }
+
+    private NodeWhile ParseFor()
+    {
+        _tokens.Advance(); // skip 'for'
+
+        NodeVarAssign initialVarAssign = ParseVarAssign(false);
+        NodeVarRef loopVarRef = initialVarAssign.Var;
+        Node step = new NodeString { Value = "1" };
+
+        if (!_tokens.CurrentIs(TokenType.Comma))
+        {
+            throw new ParseException("Expected comma after assignment for variable");
+        }
+        
+        _tokens.Advance(); // skip first comma
+        Node goal = ParseExpr(false);
+
+        if (_tokens.CurrentIs(TokenType.Comma))
+        {
+            _tokens.Advance();
+            step = ParseExpr(false);
+        }
+        
+        if (!_tokens.CurrentIs(TokenType.LBrace))
+        {
+            throw new ParseException("Expected while body");
+        }
+
+        _loopDepth++;
+        List<Node> body = ParseInstructionBlock();
+        _loopDepth--;
+        
+        // Check if we should exit
+        body.Add(new NodeIf
+        {
+            Main = new NodeIf.Branch(
+                Condition: new NodeBinaryOp { Lhs = loopVarRef, Rhs = goal, Op = BinOperatorType.Eq },
+                Body: [
+                    new NodeBreakLoop()
+                ]
+            )
+        });
+        
+        // Value increment
+        body.Add(new NodeVarAssign
+        {
+            Var = loopVarRef,
+            Value = new NodeBinaryOp { Lhs = loopVarRef, Rhs = step, Op = BinOperatorType.Add }
+        });
+
+        return new NodeWhile
+        {
+            Condition = Node.True, Body =
+            [
+                initialVarAssign,
+                new NodeWhile
+                {
+                    Condition = Node.True,
+                    Body = body
+                },
+                new NodeBreakLoop()
+            ]
+        };
     }
 
     private List<Node> ParseInstructionBlock()
