@@ -107,7 +107,7 @@ public sealed class FileExecutor
         _engine.LastCmdExecution = exec;
         if (_engine.LastCmdExecution is { RunException: {} re })
         {
-            await Console.Error.WriteLineAsync(re.Message);
+            throw new ExecutionException(re.Message);
         }
 
         if (ex.NextInPipe is { } next)
