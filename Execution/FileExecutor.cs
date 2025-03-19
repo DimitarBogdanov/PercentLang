@@ -71,6 +71,15 @@ public sealed class FileExecutor
                 break;
             }
 
+            case NodeWhile whileLoop:
+            {
+                while (whileLoop.Condition.IsTruthy(_engine))
+                {
+                    await ExecuteBody(whileLoop.Body);
+                }
+                break;
+            }
+
             case NodeVarAssign nva:
             {
                 Node value;

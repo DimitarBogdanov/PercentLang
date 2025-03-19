@@ -57,6 +57,11 @@ public sealed class Parser
             return ParseIf();
         }
 
+        if (IsWhile())
+        {
+            return ParseWhile();
+        }
+
         if (_currentLine == _tokens.CurrentLine())
         {
             throw new ParseException($"There are more tokens on line {_currentLine} than expected");
@@ -255,6 +260,27 @@ public sealed class Parser
             ElseIfs = branches,
             Else = elseBody
         };
+    }
+
+    private bool IsWhile()
+    {
+        return _tokens.CurrentIs(TokenType.KwWhile);
+    }
+
+    private NodeWhile ParseWhile()
+    {
+        _tokens.Advance(); // skip 'while'
+
+        Node condition = ParseExpr(false);
+
+        if (!_tokens.CurrentIs(TokenType.LBrace))
+        {
+            throw new ParseException("Expected while body");
+        }
+
+        List<Node> body = ParseInstructionBlock();
+
+        return new NodeWhile { Condition = condition, Body = body };
     }
 
     private List<Node> ParseInstructionBlock()
