@@ -255,6 +255,7 @@ public sealed class Scanner
                     "while"  => TokenType.KwWhile,
                     "for"    => TokenType.KwFor,
                     "until"  => TokenType.KwUntil,
+                    "break"  => TokenType.KwBreak,
 
                     _ => TokenType.Default
                 };

@@ -24,6 +24,7 @@ public enum TokenType
     KwWhile,
     KwFor,
     KwUntil,
+    KwBreak,
     
     Eof
 }

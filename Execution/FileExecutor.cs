@@ -27,10 +27,16 @@ public sealed class FileExecutor
         }
     }
 
+    /// <returns>Whether the execution was interrupted (break/return)</returns>
     private async Task ExecuteBody(List<Node> body)
     {
         foreach (Node cmd in body)
         {
+            if (cmd is NodeBreakLoop)
+            {
+                throw new LoopInterruptionException();
+            }
+            
             await ExecuteCommand(cmd);
         }
     }
@@ -73,9 +79,16 @@ public sealed class FileExecutor
 
             case NodeWhile whileLoop:
             {
-                while (whileLoop.Condition.IsTruthy(_engine))
+                try
                 {
-                    await ExecuteBody(whileLoop.Body);
+                    while (whileLoop.Condition.IsTruthy(_engine))
+                    {
+                        await ExecuteBody(whileLoop.Body);
+                    }
+                }
+                catch (LoopInterruptionException)
+                {
+                    // discard
                 }
                 break;
             }

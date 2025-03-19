@@ -17,6 +17,7 @@ public sealed class Parser
 
     private readonly TokenReaderUtil _tokens;
 
+    private int _loopDepth;
     private int _currentLine;
 
     public NodeFile Parse()
@@ -60,6 +61,11 @@ public sealed class Parser
         if (IsWhile())
         {
             return ParseWhile();
+        }
+
+        if (IsBreak())
+        {
+            return ParseBreak();
         }
 
         if (_currentLine == _tokens.CurrentLine())
@@ -278,7 +284,9 @@ public sealed class Parser
             throw new ParseException("Expected while body");
         }
 
+        _loopDepth++;
         List<Node> body = ParseInstructionBlock();
+        _loopDepth--;
 
         return new NodeWhile { Condition = condition, Body = body };
     }
@@ -296,6 +304,22 @@ public sealed class Parser
         
         _tokens.Advance(); // skip '}'
         return res;
+    }
+
+    private bool IsBreak()
+    {
+        return _tokens.CurrentIs(TokenType.KwBreak);
+    }
+
+    private NodeBreakLoop ParseBreak()
+    {
+        if (_loopDepth == 0)
+        {
+            throw new ParseException("Break statement should not exist outside of a loop");
+        }
+
+        _tokens.Advance(); // skip 'break'
+        return new NodeBreakLoop();
     }
 
     private bool IsString()
@@ -466,6 +490,7 @@ public sealed class Parser
     private bool Try(Func<bool> action)
     {
         BacktrackPoint bp = _tokens.GetBacktrackPoint();
+        int loopDepth = _loopDepth;
 
         try
         {
@@ -477,6 +502,7 @@ public sealed class Parser
         }
         finally
         {
+            _loopDepth = loopDepth;
             bp.RevertParser();
         }
     }
