@@ -179,6 +179,10 @@ public sealed class Scanner
                     case ':':
                         PushTok(TokenType.Colon, ":");
                         continue;
+                    
+                    case '#':
+                        PushTok(TokenType.Hash, "#");
+                        continue;
                 }
             }
 

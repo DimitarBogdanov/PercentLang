@@ -11,24 +11,27 @@ public sealed class Parser
     {
         _tokens = new TokenReaderUtil(tokens);
         Messages = new List<string>();
+        
+        _file = new NodeFile();
     }
 
     public List<string> Messages { get; }
 
     private readonly TokenReaderUtil _tokens;
+    private readonly NodeFile _file;
 
     private int _loopDepth;
+    private int _commandExecWrapperDepth;
     private int _currentLine;
 
     public NodeFile Parse()
     {
-        NodeFile file = new();
         while (!_tokens.IsEof())
         {
             try
             {
                 Node line = ParseLine();
-                file.Commands.Add(line);
+                _file.Commands.Add(line);
             }
             catch (ParseException ex)
             {
@@ -37,7 +40,7 @@ public sealed class Parser
             }
         }
 
-        return file;
+        return _file;
     }
 
     private Node ParseLine()
@@ -45,7 +48,7 @@ public sealed class Parser
         _currentLine = _tokens.CurrentLine();
         if (IsVarAssign())
         {
-            return ParseVarAssign(true);
+            return ParseVarAssign();
         }
         
         if (IsNameRef())
@@ -86,12 +89,12 @@ public sealed class Parser
         throw new ParseException("Expected command, if/loop, or variable assignment");
     }
 
-    private Node ParseExpr(bool allowCommandExecutions)
+    private Node ParseExpr()
     {
-        return ParseExprRhs(ParseExprPrimary(allowCommandExecutions), 0, allowCommandExecutions);
+        return ParseExprRhs(ParseExprPrimary(), 0);
     }
 
-    private Node ParseExprRhs(Node lhs, int minPrecedence, bool allowCommandExecutions)
+    private Node ParseExprRhs(Node lhs, int minPrecedence)
     {
         Token lookahead = _tokens.Current();
         if (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() >= minPrecedence)
@@ -99,13 +102,13 @@ public sealed class Parser
             BinOperatorType op = lookahead.BinOperatorType;
             _tokens.Advance();
 
-            Node rhs = ParseExprPrimary(allowCommandExecutions);
+            Node rhs = ParseExprPrimary();
 
             lookahead = _tokens.Current();
 
             while (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() > op.GetPrecedence())
             {
-                rhs = ParseExprRhs(rhs, op.GetPrecedence() + 1, allowCommandExecutions);
+                rhs = ParseExprRhs(rhs, op.GetPrecedence() + 1);
                 lookahead = _tokens.Current();
             }
 
@@ -115,11 +118,15 @@ public sealed class Parser
         return lhs;
     }
 
-    private Node ParseExprPrimary(bool allowCommandExecutions)
+    private Node ParseExprPrimary()
     {
         Node returnValue;
-        
-        if (IsString())
+
+        if (IsCommandWrapper())
+        {
+            returnValue = ParseCommandWrapper();
+        }
+        else if (IsString())
         {
             returnValue = ParseString();
         }
@@ -129,19 +136,12 @@ public sealed class Parser
         }
         else if (IsNameRef())
         {
-            if (allowCommandExecutions)
-            {
-                returnValue = ParseCommand();
-            }
-            else
-            {
-                string nameRef = ParseNameRef();
+            string nameRef = ParseNameRef();
                 
-                returnValue = new NodeString
-                {
-                    Value = nameRef
-                };
-            }
+            returnValue = new NodeString
+            {
+                Value = nameRef
+            };
         }
         else if (IsVarRef())
         {
@@ -152,7 +152,7 @@ public sealed class Parser
             throw new ParseException("Expected expression");
         }
 
-        if (allowCommandExecutions && (IsPipe() || _tokens.CurrentIs(TokenType.Colon)))
+        if (IsPipe() || _tokens.CurrentIs(TokenType.Colon))
         {
             FilterType filters = ParseFiltersIfAny();
             
@@ -170,6 +170,51 @@ public sealed class Parser
         return returnValue;
     }
 
+    private bool IsCommandWrapper()
+    {
+        return _tokens.CurrentIs(TokenType.Hash);
+    }
+
+    private NodeVarRef ParseCommandWrapper()
+    {
+        _tokens.Advance(); // skip '#'
+
+        if (!_tokens.CurrentIs(TokenType.LParen))
+        {
+            throw new ParseException("Expected #( command ) syntax");
+        }
+        
+        _tokens.Advance(); // skip '('
+
+        _commandExecWrapperDepth++;
+        NodeCommandExecution exec = ParseCommand();
+        _commandExecWrapperDepth--;
+
+        if (!_tokens.CurrentIs(TokenType.RParen))
+        {
+            throw new ParseException("Expected ) to close command execution");
+        }
+        
+        _tokens.Advance(); // skip ')'
+
+        string varName = $"!CmdWrapper_{Guid.NewGuid().ToString()}";
+        NodeVarRef varRef = new NodeVarRef { Name = varName };
+        
+        _file.Commands.Add(exec);
+        _file.Commands.Add(new NodeVarAssign
+        {
+            Var = varRef,
+            Value = new NodeCommandExecution
+            {
+                CommandName = "from_last_cmd",
+                Filters = exec.Filters,
+                Arguments = []
+            }
+        });
+
+        return varRef;
+    }
+
     private NodeCommandExecution ParseCommand()
     {
         int line = _tokens.Current().Line;
@@ -180,7 +225,12 @@ public sealed class Parser
                && _tokens.CurrentLine() == line
                && !_tokens.CurrentIs(TokenType.Pipe, TokenType.Colon))
         {
-            args.Add(ParseExpr(false));
+            if (_tokens.CurrentIs(TokenType.RParen) && _commandExecWrapperDepth != 0)
+            {
+                break;
+            }
+            
+            args.Add(ParseExpr());
         }
 
         FilterType filters = ParseFiltersIfAny();
@@ -215,11 +265,11 @@ public sealed class Parser
         });
     }
 
-    private NodeVarAssign ParseVarAssign(bool allowCommandExecutions)
+    private NodeVarAssign ParseVarAssign()
     {
         NodeVarRef var = ParseVarRef();
         _tokens.Advance(); // skip '='
-        Node value = ParseExpr(allowCommandExecutions);
+        Node value = ParseExpr();
 
         return new NodeVarAssign
         {
@@ -236,7 +286,7 @@ public sealed class Parser
     private NodeIf ParseIf()
     {
         _tokens.Advance(); // skip 'if'
-        Node mainCondition = ParseExpr(false);
+        Node mainCondition = ParseExpr();
         
         if (!_tokens.CurrentIs(TokenType.LBrace))
         {
@@ -248,7 +298,7 @@ public sealed class Parser
         while (_tokens.CurrentIs(TokenType.KwElseIf))
         {
             _tokens.Advance(); // skip 'elseif'
-            Node cond = ParseExpr(false);
+            Node cond = ParseExpr();
             if (!_tokens.CurrentIs(TokenType.LBrace))
             {
                 throw new ParseException("Expected elseif body");
@@ -287,7 +337,7 @@ public sealed class Parser
     {
         _tokens.Advance(); // skip 'while'
 
-        Node condition = ParseExpr(false);
+        Node condition = ParseExpr();
 
         if (!_tokens.CurrentIs(TokenType.LBrace))
         {
@@ -327,7 +377,7 @@ public sealed class Parser
         
         _tokens.Advance(); // skip 'until'
 
-        Node condition = ParseExpr(false);
+        Node condition = ParseExpr();
 
         body.Add(
             new NodeIf
@@ -348,7 +398,7 @@ public sealed class Parser
     {
         _tokens.Advance(); // skip 'for'
 
-        NodeVarAssign initialVarAssign = ParseVarAssign(false);
+        NodeVarAssign initialVarAssign = ParseVarAssign();
         NodeVarRef loopVarRef = initialVarAssign.Var;
         Node step = new NodeString { Value = "1" };
 
@@ -358,12 +408,12 @@ public sealed class Parser
         }
         
         _tokens.Advance(); // skip first comma
-        Node goal = ParseExpr(false);
+        Node goal = ParseExpr();
 
         if (_tokens.CurrentIs(TokenType.Comma))
         {
             _tokens.Advance();
-            step = ParseExpr(false);
+            step = ParseExpr();
         }
         
         if (!_tokens.CurrentIs(TokenType.LBrace))
@@ -475,13 +525,13 @@ public sealed class Parser
                 string key = _tokens.Current().Value;
                 _tokens.Advance(); // skip key
                 _tokens.Advance(); // skip value
-                Node value = ParseExpr(false);
+                Node value = ParseExpr();
 
                 values[key] = value;
             }
             else
             {
-                Node value = ParseExpr(false);
+                Node value = ParseExpr();
                 values[listIdx.ToString()] = value;
                 listIdx++;
             }
@@ -511,7 +561,7 @@ public sealed class Parser
     private NodeTableAccess ParseTableAccess(NodeVarRef tableRef)
     {
         _tokens.Advance(); // skip '['
-        Node index = ParseExpr(false);
+        Node index = ParseExpr();
         _tokens.Advance(); // skip ']'
 
         return new NodeTableAccess { Name = tableRef.Name, Index = index };
