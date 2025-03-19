@@ -1,4 +1,6 @@
-﻿namespace PercentLang.Execution;
+﻿using System.Globalization;
+
+namespace PercentLang.Execution;
 
 public static class Builtins
 {
@@ -60,7 +62,7 @@ public static class Builtins
             string? result = cmd.Arguments.FirstOrDefault();
             if (result != null)
             {
-                if (Int32.TryParse(result, out int code))
+                if (Int32.TryParse(result, CultureInfo.InvariantCulture, out int code))
                 {
                     Environment.Exit(code);
                 }

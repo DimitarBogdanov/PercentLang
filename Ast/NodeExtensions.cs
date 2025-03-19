@@ -1,4 +1,5 @@
-﻿using PercentLang.Execution;
+﻿using System.Globalization;
+using PercentLang.Execution;
 
 namespace PercentLang.Ast;
 
@@ -8,7 +9,7 @@ public static class NodeExtensions
     {
         string str = node.GetStringRepresentation(engine);
         
-        if (Double.TryParse(str, out value))
+        if (Double.TryParse(str, CultureInfo.InvariantCulture, out value))
         {
             return true;
         }

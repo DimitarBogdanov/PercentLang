@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace PercentLang.Scanning;
 
@@ -267,7 +268,7 @@ public sealed class Scanner
 
         if (t == TokenType.Default && _state != State.DefaultEscaped)
         {
-            if (Double.TryParse(trimmedVal, out _))
+            if (Double.TryParse(trimmedVal, CultureInfo.InvariantCulture, out _))
             {
                 t = TokenType.String;
             }
