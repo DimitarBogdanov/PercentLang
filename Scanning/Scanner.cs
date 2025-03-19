@@ -200,7 +200,11 @@ public sealed class Scanner
 
     private void PushTok(TokenType type)
     {
-        string value = _value.ToString().Trim();
+        string value = _value.ToString();
+        if (_state != State.String)
+        {
+            value = value.Trim();
+        }
         _tokens.AddLast(new Token(value, type, _line, BinOperatorType.None));
 
         _value.Clear();
