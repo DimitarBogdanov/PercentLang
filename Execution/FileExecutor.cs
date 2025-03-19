@@ -27,6 +27,14 @@ public sealed class FileExecutor
         }
     }
 
+    private async Task ExecuteBody(List<Node> body)
+    {
+        foreach (Node cmd in body)
+        {
+            await ExecuteCommand(cmd);
+        }
+    }
+
     private async Task ExecuteCommand(Node cmd)
     {
         switch (cmd)
@@ -34,6 +42,32 @@ public sealed class FileExecutor
             case NodeCommandExecution ex:
             {
                 await ExecCommand(ex);
+                break;
+            }
+
+            case NodeIf ifStat:
+            {
+                if (ifStat.Main.Condition.IsTruthy(_engine))
+                {
+                    await ExecuteBody(ifStat.Main.Body);
+                }
+                else
+                {
+                    foreach (NodeIf.Branch branch in ifStat.ElseIfs)
+                    {
+                        if (branch.Condition.IsTruthy(_engine))
+                        {
+                            await ExecuteBody(branch.Body);
+                            return;
+                        }
+                    }
+
+                    if (ifStat.Else != null)
+                    {
+                        await ExecuteBody(ifStat.Else);
+                    }
+                }
+                
                 break;
             }
 

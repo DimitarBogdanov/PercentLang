@@ -12,4 +12,16 @@ public abstract class Node
     {
         return Null.GetStringRepresentation(engine);
     }
+
+    public bool IsTruthy(ExecutionEngine engine)
+    {
+        return !IsFalsy(engine);
+    }
+
+    public bool IsFalsy(ExecutionEngine engine)
+    {
+        return this == False
+               || this == Null
+               || GetStringRepresentation(engine) is "FALSE" or "";
+    }
 }

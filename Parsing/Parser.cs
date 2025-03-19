@@ -46,9 +46,15 @@ public sealed class Parser
         {
             return ParseVarAssign();
         }
-        else if (IsNameRef())
+        
+        if (IsNameRef())
         {
             return ParseCommand();
+        }
+
+        if (IsIf())
+        {
+            return ParseIf();
         }
 
         if (_currentLine == _tokens.CurrentLine())
@@ -199,6 +205,71 @@ public sealed class Parser
             Var = var,
             Value = value
         };
+    }
+
+    private bool IsIf()
+    {
+        return _tokens.CurrentIs(TokenType.KwIf);
+    }
+
+    private NodeIf ParseIf()
+    {
+        _tokens.Advance(); // skip 'if'
+        Node mainCondition = ParseExpr(false);
+        
+        if (!_tokens.CurrentIs(TokenType.LBrace))
+        {
+            throw new ParseException("Expected if body");
+        }
+        List<Node> mainBody = ParseInstructionBlock();
+
+        List<NodeIf.Branch> branches = [];
+        while (_tokens.CurrentIs(TokenType.KwElseIf))
+        {
+            _tokens.Advance(); // skip 'elseif'
+            Node cond = ParseExpr(false);
+            if (!_tokens.CurrentIs(TokenType.LBrace))
+            {
+                throw new ParseException("Expected elseif body");
+            }
+
+            List<Node> body = ParseInstructionBlock();
+            branches.Add(new NodeIf.Branch(cond, body));
+        }
+
+        List<Node>? elseBody = null;
+        if (_tokens.CurrentIs(TokenType.KwElse))
+        {
+            _tokens.Advance(); // skip 'else'
+            if (!_tokens.CurrentIs(TokenType.LBrace))
+            {
+                throw new ParseException("Expected else body");
+            }
+
+            elseBody = ParseInstructionBlock();
+        }
+
+        return new NodeIf
+        {
+            Main = new NodeIf.Branch(mainCondition, mainBody),
+            ElseIfs = branches,
+            Else = elseBody
+        };
+    }
+
+    private List<Node> ParseInstructionBlock()
+    {
+        _tokens.Advance(); // skip '{'
+
+        List<Node> res = [];
+        while (!_tokens.IsEof() && !_tokens.CurrentIs(TokenType.RBrace))
+        {
+            Node line = ParseLine();
+            res.Add(line);
+        }
+        
+        _tokens.Advance(); // skip '}'
+        return res;
     }
 
     private bool IsString()
