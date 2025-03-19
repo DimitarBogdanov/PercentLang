@@ -197,6 +197,10 @@ public sealed class Scanner
                     case '#':
                         PushTok(TokenType.Hash, "#");
                         continue;
+                    
+                    case '!':
+                        PushTok(TokenType.Bang, "!");
+                        continue;
                 }
             }
 

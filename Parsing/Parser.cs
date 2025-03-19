@@ -151,6 +151,10 @@ public sealed class Parser
         {
             returnValue = ParseNegateNumber();
         }
+        else if (IsFlipBool())
+        {
+            returnValue = ParseFlipBool();
+        }
         else
         {
             throw new ParseException("Expected expression");
@@ -520,6 +524,18 @@ public sealed class Parser
         _tokens.Advance(); // skip '-'
         Node value = ParseExprPrimary();
         return new NodeNegateNumber { InnerValue = value };
+    }
+    
+    private bool IsFlipBool()
+    {
+        return _tokens.CurrentIs(TokenType.Bang);
+    }
+
+    private NodeFlipBool ParseFlipBool()
+    {
+        _tokens.Advance(); // skip '!'
+        Node value = ParseExprPrimary();
+        return new NodeFlipBool { InnerValue = value };
     }
 
     private bool IsTable()

@@ -8,6 +8,7 @@ public enum TokenType
     Comma,
     Pipe,
     Hash,
+    Bang,
     Colon,
     OpSet,
     OpBinary,
