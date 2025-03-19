@@ -8,8 +8,16 @@ public class NodeVarRef : Node
 
     public override string GetStringRepresentation(ExecutionEngine engine)
     {
-        return engine
-            .GetVariableValueOrNullNode(Name)
-            .GetStringRepresentation(engine);
+        return GetValue(engine).GetStringRepresentation(engine);
+    }
+
+    public virtual Node GetValue(ExecutionEngine engine)
+    {
+        return engine.GetVariableValueOrNullNode(Name);
+    }
+
+    public virtual void SetValue(ExecutionEngine engine, Node value)
+    {
+        engine.Variables[Name] = value;
     }
 }

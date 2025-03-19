@@ -109,27 +109,9 @@ public sealed class FileExecutor
                 {
                     value = new NodeString { Value = nva.Value.GetStringRepresentation(_engine) };
                 }
-
-                if (nva.Var is NodeTableAccess tableAccess)
-                {
-                    Node tbl = _engine.GetVariableValueOrNullNode(tableAccess.Name);
-                    if (tbl is not NodeTable table)
-                    {
-                        throw new ExecutionException("Attempted to set a value of non-table");
-                    }
-                        
-                    string? stringRep = tableAccess.Index.GetStringRepresentation(_engine);
-                    if (stringRep == null)
-                    {
-                        throw new ExecutionException("Table index was evaluated as NULL");
-                    }
-
-                    table.SetValue(stringRep, nva.Value);
-                }
-                else
-                {
-                    _engine.Variables[nva.Var.Name] = value;
-                }
+                
+                nva.Var.SetValue(_engine, value);
+                
                 break;
             }
         }
@@ -146,13 +128,28 @@ public sealed class FileExecutor
         }
         else
         {
+            List<Node> args = [];
+            foreach (Node arg in ex.Arguments)
+            {
+                Node useValue;
+                if (arg is NodeVarRef varRef)
+                {
+                    useValue = varRef.GetValue(_engine);
+                }
+                else
+                {
+                    useValue = arg;
+                }
+                args.AddRange(useValue.GetExplodedVersion());
+            }
+            
             string commandName = ex.CommandName;
             if (_engine.Aliases.TryGetValue(commandName, out string? aliasedName))
             {
                 commandName = aliasedName;
             }
 
-            exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, ex.Arguments);
+            exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, args);
         }
         
         exec.Muted = muted;

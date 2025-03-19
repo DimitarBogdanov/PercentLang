@@ -1,4 +1,6 @@
-﻿namespace PercentLang.Ast;
+﻿using System.Globalization;
+
+namespace PercentLang.Ast;
 
 public sealed class NodeTable : Node
 {
@@ -25,5 +27,19 @@ public sealed class NodeTable : Node
     public void SetValue(string index, Node value)
     {
         _values[index] = value;
+    }
+
+    public override IEnumerable<Node> GetExplodedVersion()
+    {
+        int i = 0;
+        while (_values.TryGetValue(i.ToString(CultureInfo.InvariantCulture), out Node? value))
+        {
+            foreach (Node node in value.GetExplodedVersion())
+            {
+                yield return node;
+            }
+
+            i++;
+        }
     }
 }

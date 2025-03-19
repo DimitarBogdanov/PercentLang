@@ -24,4 +24,9 @@ public abstract class Node
                || this == Null
                || GetStringRepresentation(engine) is "FALSE" or "";
     }
+
+    public virtual IEnumerable<Node> GetExplodedVersion()
+    {
+        yield return this;
+    }
 }
