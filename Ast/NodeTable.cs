@@ -21,4 +21,9 @@ public sealed class NodeTable : Node
     {
         return _values.GetValueOrDefault(index, Null);
     }
+
+    public void SetValue(string index, Node value)
+    {
+        _values[index] = value;
+    }
 }

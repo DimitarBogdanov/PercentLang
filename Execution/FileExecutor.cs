@@ -15,27 +15,62 @@ public sealed class FileExecutor
     {
         foreach (Node cmd in _engine.File.Commands)
         {
-            switch (cmd)
+            try
             {
-                case NodeCommandExecution ex:
+                await ExecuteCommand(cmd);
+            }
+            catch (ExecutionException e)
+            {
+                await Console.Error.WriteLineAsync(e.Message);
+                return;
+            }
+        }
+    }
+
+    private async Task ExecuteCommand(Node cmd)
+    {
+        switch (cmd)
+        {
+            case NodeCommandExecution ex:
+            {
+                await ExecCommand(ex);
+                break;
+            }
+
+            case NodeVarAssign nva:
+            {
+                Node value;
+                if (nva.Value is NodeCommandExecution nce)
                 {
-                    await ExecCommand(ex);
-                    break;
+                    await ExecCommand(nce);
+                    value = new NodeString { Value = _engine.GetLastCommandOutputRespectFilters() };
+                }
+                else
+                {
+                    value = nva.Value;
                 }
 
-                case NodeVarAssign nva:
+                if (nva.Var is NodeTableAccess tableAccess)
                 {
-                    if (nva.Value is NodeCommandExecution nce)
+                    Node tbl = _engine.GetVariableValueOrNullNode(tableAccess.Name);
+                    if (tbl is not NodeTable table)
                     {
-                        await ExecCommand(nce);
-                        _engine.Variables[nva.Var.Name] = new NodeString { Value = _engine.GetLastCommandOutputRespectFilters() };
+                        throw new ExecutionException("Attempted to set a value of non-table");
                     }
-                    else
+                        
+                    string? stringRep = tableAccess.Index.GetStringRepresentation(_engine);
+                    if (stringRep == null)
                     {
-                        _engine.Variables[nva.Var.Name] = nva.Value;
+                        throw new ExecutionException("Table index was evaluated as NULL");
                     }
-                    break;
+
+                    table.SetValue(stringRep, nva.Value);
                 }
+                else
+                {
+                    _engine.Variables[nva.Var.Name] = value;
+                }
+                break;
             }
         }
     }
