@@ -73,6 +73,6 @@ public sealed class TokenReaderUtil
 
     private Token GetEofTok()
     {
-        return new Token("<EOF>", TokenType.Eof, _maxLine);
+        return new Token("<EOF>", TokenType.Eof, _maxLine, BinOperatorType.None);
     }
 }

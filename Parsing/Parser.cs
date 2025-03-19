@@ -61,6 +61,36 @@ public sealed class Parser
 
     private Node ParseExpr(bool allowCommandExecutions)
     {
+        return ParseExprRhs(ParseExprPrimary(allowCommandExecutions), 0, allowCommandExecutions);
+    }
+
+    private Node ParseExprRhs(Node lhs, int minPrecedence, bool allowCommandExecutions)
+    {
+        Token lookahead = _tokens.Current();
+        if (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() >= minPrecedence)
+        {
+            BinOperatorType op = lookahead.BinOperatorType;
+            _tokens.Advance();
+
+            Node rhs = ParseExprPrimary(allowCommandExecutions);
+
+            lookahead = _tokens.Current();
+
+            while (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() > op.GetPrecedence())
+            {
+                rhs = ParseExprRhs(rhs, op.GetPrecedence() + 1, allowCommandExecutions);
+                lookahead = _tokens.Current();
+                _tokens.Advance();
+            }
+
+            lhs = new NodeBinaryOp { Op = op, Lhs = lhs, Rhs = rhs };
+        }
+
+        return lhs;
+    }
+
+    private Node ParseExprPrimary(bool allowCommandExecutions)
+    {
         Node returnValue;
         
         if (IsString())
