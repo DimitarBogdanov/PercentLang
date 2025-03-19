@@ -18,6 +18,12 @@ public class NodeVarRef : Node
 
     public virtual void SetValue(ExecutionEngine engine, Node value)
     {
+        if (value == Null)
+        {
+            engine.Variables.Remove(Name);
+            return;
+        }
+        
         engine.Variables[Name] = value;
     }
 }

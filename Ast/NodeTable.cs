@@ -27,6 +27,12 @@ public sealed class NodeTable : Node
 
     public void SetValue(string index, Node value)
     {
+        if (value == Null)
+        {
+            _values.Remove(index);
+            return;
+        }
+        
         _values[index] = value;
     }
 
