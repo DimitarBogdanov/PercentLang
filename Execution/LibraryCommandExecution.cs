@@ -1,8 +1,10 @@
-﻿namespace PercentLang.Execution;
+﻿using PercentLang.Ast;
+
+namespace PercentLang.Execution;
 
 public sealed class LibraryCommandExecution : CommandExecution
 {
-    public LibraryCommandExecution(ExecutionEngine engine, FilterType filters, string library, string command, string input, List<string> args)
+    public LibraryCommandExecution(ExecutionEngine engine, FilterType filters, string library, string command, string input, List<Node> args)
         : base(engine, filters, command, input, args)
     {
         Muted = true;

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using PercentLang.Ast;
 
 namespace PercentLang.Execution;
 
@@ -36,7 +37,7 @@ public static class Builtins
             }
 
             string cmdName = cmd.Arguments[0];
-            List<string> args = cmd.Arguments.Skip(1).ToList();
+            List<Node> args = cmd.NodeArguments.Skip(1).ToList();
 
             CommandExecution exec = CommandExecution.Create(cmd.Engine, FilterType.StdOut, cmdName, "", args);
             exec.Run().Wait();

@@ -146,17 +146,13 @@ public sealed class FileExecutor
         }
         else
         {
-            List<string> args = ex.Arguments
-                .Select(x => x.GetStringRepresentation(_engine))
-                .ToList();
-
             string commandName = ex.CommandName;
             if (_engine.Aliases.TryGetValue(commandName, out string? aliasedName))
             {
                 commandName = aliasedName;
             }
 
-            exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, args);
+            exec = CommandExecution.Create(_engine, ex.Filters, commandName, input, ex.Arguments);
         }
         
         exec.Muted = muted;

@@ -6,12 +6,14 @@ namespace PercentLang.Execution;
 
 public abstract class CommandExecution
 {
-    protected CommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
+    protected CommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<Node> args)
     {
         Engine = engine;
         
         CommandName = command;
-        Arguments = args;
+        NodeArguments = args;
+
+        Arguments = [];
 
         Filters = filters;
 
@@ -27,8 +29,13 @@ public abstract class CommandExecution
     public string StdErr => Err.ToString();
     
     public Exception? RunException { get; protected set; }
-    
+
+    /// <summary>
+    /// Filled right before execution.
+    /// </summary>
     public List<string> Arguments { get; }
+    
+    public List<Node> NodeArguments { get; }
     
     public FilterType Filters { get; }
 
@@ -41,7 +48,7 @@ public abstract class CommandExecution
     
     public ExecutionEngine Engine { get; }
 
-    public static CommandExecution Create(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
+    public static CommandExecution Create(ExecutionEngine engine, FilterType filters, string command, string input, List<Node> args)
     {
         if (Builtins.Factories.ContainsKey(command))
         {
@@ -63,6 +70,14 @@ public abstract class CommandExecution
     
     public async Task<bool> Run()
     {
+        Arguments.Clear();
+        
+        foreach (Node node in NodeArguments)
+        {
+            string rep = node.GetStringRepresentation(Engine);
+            Arguments.Add(rep);
+        }
+        
         try
         {
             await RunInternal();

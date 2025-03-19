@@ -5,7 +5,7 @@ namespace PercentLang.Execution;
 
 public sealed class ProcessCommandExecution : CommandExecution
 {
-    public ProcessCommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<string> args)
+    public ProcessCommandExecution(ExecutionEngine engine, FilterType filters, string command, string input, List<Node> args)
         : base(engine, filters, command, input, args)
     {
     }

@@ -14,11 +14,7 @@ public sealed class NodeTableAccess : NodeVarRef
             return Null.GetStringRepresentation(engine);
         }
 
-        string? idx = Index.GetStringRepresentation(engine);
-        if (idx == null)
-        {
-            return Null.GetStringRepresentation(engine);
-        }
+        string idx = Index.GetStringRepresentation(engine);
 
         return tbl.GetValue(idx).GetStringRepresentation(engine);
     }
