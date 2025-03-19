@@ -144,6 +144,10 @@ public sealed class Scanner
                     PushTok(TokenType.Comma, ",");
                     continue;
                 
+                case '+' when next is '+':
+                    _pos++;
+                    PushBinOpTok(BinOperatorType.Concat, "++");
+                    continue;
                 case '+':
                     PushBinOpTok(BinOperatorType.Add, "+");
                     continue;
@@ -162,10 +166,6 @@ public sealed class Scanner
                 
                 case '%':
                     PushBinOpTok(BinOperatorType.Mod, "%");
-                    continue;
-                
-                case '.':
-                    PushBinOpTok(BinOperatorType.Concat, ".");
                     continue;
                 
                 case '|':
