@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using PercentLang.Execution;
 
 namespace PercentLang.Ast;
 
@@ -41,5 +42,10 @@ public sealed class NodeTable : Node
 
             i++;
         }
+    }
+
+    public override string GetStringRepresentation(ExecutionEngine engine)
+    {
+        return $"Table{{{_values.Count} value(s)}}";
     }
 }
