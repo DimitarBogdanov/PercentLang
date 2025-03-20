@@ -68,6 +68,19 @@ public static class LibraryStandardInjector
                 }),
             }
         });
+        
+        // Lib.Util
+        engine.Libraries.Add(new Library
+        {
+            Name = "Util",
+            Functions =
+            {
+                ["Len"] = ILibraryFn.Wrap(exec =>
+                {
+                    exec.WriteStdOut(exec.NodeArguments.Count.ToString());
+                })
+            }
+        });
 
         engine.Libraries.Add(new Library
         {
