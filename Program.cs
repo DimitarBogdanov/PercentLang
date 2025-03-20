@@ -74,6 +74,11 @@ public static class Program
             Console.WriteLine(msg);
         }
 
+        if (parser.Messages.Count != 0)
+        {
+            return;
+        }
+
         ExecutionEngine engine = new(file);
         await engine.Execute();
     }
