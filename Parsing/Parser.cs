@@ -138,7 +138,12 @@ public sealed class Parser
     {
         Node returnValue;
 
-        if (IsCommandWrapper())
+        if (_tokens.CurrentIs(TokenType.Hash) && _tokens.Peek().Type == TokenType.LBrace)
+        {
+            _tokens.Advance(); // skip '#'
+            returnValue = new NodeFunc { Body = ParseInstructionBlock() };
+        }
+        else if (IsCommandWrapper())
         {
             returnValue = ParseCommandWrapper();
         }

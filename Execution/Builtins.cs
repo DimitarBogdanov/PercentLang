@@ -43,6 +43,53 @@ public static class Builtins
             exec.Run().Wait();
         },
         
+        ["runfn"] = cmd => () =>
+        {
+            if (cmd.Arguments.Count == 0)
+            {
+                throw new ExecutionException("No function supplied");
+            }
+
+
+            NodeFunc fn;
+            if (cmd.NodeArguments.First() is NodeVarRef varRef)
+            {
+                Node value = varRef.GetValue(cmd.Engine);
+                if (value is NodeFunc fn1)
+                {
+                    fn = fn1;
+                }
+                else
+                {
+                    throw new ExecutionException("Expected function for runfn");
+                }
+            }
+            else if (cmd.NodeArguments.First() is NodeFunc fn1)
+            {
+                fn = fn1;
+            }
+            else
+            {
+                throw new ExecutionException("Expected function for runfn");
+            }
+
+            Node previousArgs = cmd.Engine.GetVariableValueOrNullNode("Args");
+            NodeTable newArgs = new();
+            Dictionary<string, Node> newArgsValues = [];
+            for (int i = 1; i < cmd.NodeArguments.Count; i++)
+            {
+                newArgsValues[(i - 1).ToString()] = cmd.NodeArguments[i];
+            }
+            
+            newArgs.Init(newArgsValues);
+
+            cmd.Engine.Variables["Args"] = newArgs;
+
+            cmd.Engine.CurrentFileExecutor.ExecuteBody(fn.Body).Wait();
+            
+            cmd.Engine.Variables["Args"] = previousArgs;
+        },
+        
         ["from_last_cmd"] = cmd => () =>
         {
             CommandExecution? last = cmd.Engine.LastCmdExecution;
@@ -75,5 +122,37 @@ public static class Builtins
             
             Environment.Exit(0);
         },
+        
+        ["clear"] = _ => Console.Clear,
+        
+        ["bg"] = cmd => () =>
+        {
+            ConsoleColor color = ConsoleColor.Black;
+            if (cmd.Arguments.Count != 0)
+            {
+                if (!Enum.TryParse(cmd.Arguments.First(), out color))
+                {
+                    throw new ExecutionException("Unknown color");
+                    return;
+                }
+            }
+
+            Console.BackgroundColor = color;
+        },
+        
+        ["fg"] = cmd => () =>
+        {
+            ConsoleColor color = ConsoleColor.White;
+            if (cmd.Arguments.Count != 0)
+            {
+                if (!Enum.TryParse(cmd.Arguments.First(), out color))
+                {
+                    throw new ExecutionException("Unknown color");
+                    return;
+                }
+            }
+
+            Console.ForegroundColor = color;
+        }
     };
 }

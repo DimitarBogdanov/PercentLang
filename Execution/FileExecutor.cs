@@ -28,7 +28,7 @@ public sealed class FileExecutor
     }
 
     /// <returns>Whether the execution was interrupted (break/return)</returns>
-    private async Task ExecuteBody(List<Node> body)
+    public async Task ExecuteBody(List<Node> body)
     {
         foreach (Node cmd in body)
         {
@@ -101,7 +101,7 @@ public sealed class FileExecutor
                     await ExecCommand(nce);
                     value = new NodeString { Value = _engine.GetLastCommandOutputRespectFilters() };
                 }
-                else if (nva.Value is NodeTable)
+                else if (nva.Value is NodeTable or NodeFunc)
                 {
                     value = nva.Value;
                 }

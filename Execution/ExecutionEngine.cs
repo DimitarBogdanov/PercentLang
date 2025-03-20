@@ -25,10 +25,15 @@ public sealed class ExecutionEngine
     
     public CommandExecution? LastCmdExecution { get; set; }
 
+    public FileExecutor CurrentFileExecutor => _fileExecutor
+                                               ?? throw new InvalidOperationException("No current file executor");
+
+    private FileExecutor? _fileExecutor;
+
     public async Task Execute()
     {
-        FileExecutor executor = new(this);
-        await executor.Execute();
+        _fileExecutor = new FileExecutor(this);
+        await _fileExecutor.Execute();
     }
 
     public string GetLastCommandOutputRespectFilters()
