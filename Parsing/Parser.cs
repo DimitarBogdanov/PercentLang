@@ -95,31 +95,43 @@ public sealed class Parser
 
     private Node ParseExpr()
     {
-        return ParseExprRhs(ParseExprPrimary(), 0);
-    }
-
-    private Node ParseExprRhs(Node lhs, int minPrecedence)
-    {
-        Token lookahead = _tokens.Current();
-        if (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() >= minPrecedence)
+        List<Node> expressions = [];
+        List<BinOperatorType> operators = [];
+        while (true)
         {
-            BinOperatorType op = lookahead.BinOperatorType;
-            _tokens.Advance();
-
-            Node rhs = ParseExprPrimary();
-
-            lookahead = _tokens.Current();
-
-            while (lookahead.IsBinaryOperator() && lookahead.BinOperatorType.GetPrecedence() > op.GetPrecedence())
+            Node expr = ParseExprPrimary();
+            expressions.Add(expr);
+            if (_tokens.Current().IsBinaryOperator())
             {
-                rhs = ParseExprRhs(rhs, op.GetPrecedence() + 1);
-                lookahead = _tokens.Current();
+                operators.Add(_tokens.Current().BinOperatorType);
+                _tokens.Advance();
             }
-
-            lhs = new NodeBinaryOp { Op = op, Lhs = lhs, Rhs = rhs };
+            else
+            {
+                break;
+            }
         }
 
-        return lhs;
+        while (expressions.Count > 1)
+        {
+            // The idea is to fold the lowest precedence operations first
+            int nextOpIdx = operators.IndexOf(operators.MaxBy(x => x.GetPrecedence()));
+            Node lhs = expressions[nextOpIdx];
+            Node rhs = expressions[nextOpIdx + 1];
+            BinOperatorType op = operators[nextOpIdx];
+
+            expressions[nextOpIdx] = new NodeBinaryOp
+            {
+                Lhs = lhs,
+                Rhs = rhs,
+                Op = op
+            };
+            expressions.RemoveAt(nextOpIdx + 1);
+            operators.RemoveAt(nextOpIdx);
+        }
+
+        Node result = expressions.First();
+        return result;
     }
 
     private Node ParseExprPrimary()
