@@ -28,6 +28,19 @@ alias mkdir echo
 runcmd mkdir myDir # creates directory, doesn't echo
 ```
 
+### runfn
+Runs a function. Arguments are supplied inside the Args variable.
+```
+runfn <fn> [args]
+```
+```
+$EchoCoolString = #{
+    echo "The cool string is" $Args[0]
+}
+
+runfn $EchoCoolString "hello world"
+```
+
 ### from_last_cmd
 Does nothing. Used to retrieve values from the last executed command. Useful if you need more than one result from it via a filter.
 ```
@@ -40,4 +53,19 @@ $Res = from_last_cmd : result
 Exits the shell. *code* must be a number, if absent 0 is returned. If not a number, -20250316 is returned.
 ```
 exit [code]
+```
+### bg
+Sets the background color of the console. Value must be either empty, or a valid ConsoleColor.
+```
+bg [value]
+```
+### fg
+Sets the text (foreground) color of the console. Value must be either empty, or a valid ConsoleColor.
+```
+fg [value]
+```
+### clear
+Clears the console.
+```
+clear
 ```
