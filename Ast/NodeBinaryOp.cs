@@ -150,6 +150,16 @@ public sealed class NodeBinaryOp : Node
 
                 throw new ExecutionException("Math operators require two numbers on both sides");
             }
+            
+            case BinOperatorType.Neq:
+            {
+                if (Lhs.IsNumber(engine, out double left) && Rhs.IsNumber(engine, out double right))
+                {
+                    return Math.Abs(left - right) > 0.05 ? True : False;
+                }
+
+                return Lhs.GetStringRepresentation(engine) != Rhs.GetStringRepresentation(engine) ? True : False;
+            }
 
             case BinOperatorType.Eq:
             {

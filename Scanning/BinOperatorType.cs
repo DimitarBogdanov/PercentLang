@@ -20,5 +20,6 @@ public enum BinOperatorType
     Gt,
     Leq,
     Geq,
+    Neq,
     Eq
 }

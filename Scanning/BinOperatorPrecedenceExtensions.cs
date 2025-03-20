@@ -8,8 +8,9 @@ public static class BinOperatorPrecedenceExtensions
         {
             BinOperatorType.Or => 1,
             BinOperatorType.And => 2,
-            BinOperatorType.Lt or BinOperatorType.Gt or BinOperatorType.Eq
-                or BinOperatorType.Leq or BinOperatorType.Geq => 3,
+            BinOperatorType.Lt or BinOperatorType.Gt
+                or BinOperatorType.Leq or BinOperatorType.Geq 
+                or BinOperatorType.Neq or BinOperatorType.Eq => 3,
             
             BinOperatorType.Add or BinOperatorType.Sub or BinOperatorType.Concat => 4,
             BinOperatorType.Mul or BinOperatorType.Div or BinOperatorType.Mod => 5,

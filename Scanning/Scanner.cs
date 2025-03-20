@@ -199,6 +199,10 @@ public sealed class Scanner
                         PushTok(TokenType.Hash, "#");
                         continue;
                     
+                    case '!' when next is '=':
+                        _pos++;
+                        PushBinOpTok(BinOperatorType.Neq, "!=");
+                        continue;
                     case '!':
                         PushTok(TokenType.Bang, "!");
                         continue;
