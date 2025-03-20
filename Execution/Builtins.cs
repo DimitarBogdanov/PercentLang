@@ -128,7 +128,7 @@ public static class Builtins
         ["pause"] = cmd => () =>
         {
             cmd.WriteStdOut("Press any key to continue...\n");
-            Console.ReadKey();
+            Console.ReadKey(true);
         },
         
         ["bg"] = cmd => () =>
