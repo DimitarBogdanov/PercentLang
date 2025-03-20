@@ -124,6 +124,12 @@ public static class Builtins
         },
         
         ["clear"] = _ => Console.Clear,
+
+        ["pause"] = cmd => () =>
+        {
+            cmd.WriteStdOut("Press any key to continue...\n");
+            Console.ReadKey();
+        },
         
         ["bg"] = cmd => () =>
         {

@@ -69,3 +69,8 @@ Clears the console.
 ```
 clear
 ```
+### pause
+Pauses execution.
+```
+pause
+```
