@@ -454,7 +454,7 @@ public sealed class Parser
         _loopDepth--;
         
         // Check if we should exit
-        body.Add(new NodeIf
+        body.Insert(0, new NodeIf
         {
             Main = new NodeIf.Branch(
                 Condition: new NodeBinaryOp { Lhs = loopVarRef, Rhs = goal, Op = BinOperatorType.Eq },
