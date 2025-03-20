@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using System.Text;
+using PercentLang.Ast;
 
 namespace PercentLang.Execution;
 
@@ -78,6 +78,11 @@ public static class LibraryStandardInjector
                 ["Len"] = ILibraryFn.Wrap(exec =>
                 {
                     exec.WriteStdOut(exec.NodeArguments.Count.ToString());
+                }),
+                
+                ["IsNum"] = ILibraryFn.Wrap(exec =>
+                {
+                    exec.WriteStdOut(exec.NodeArguments.FirstOrDefault() is { } n && n.IsNumber(exec.Engine, out _) ? "TRUE" : "FALSE");
                 })
             }
         });
