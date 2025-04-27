@@ -30,6 +30,7 @@ public sealed class Scanner
     public List<Token> Tokenize()
     {
         bool isEscape = false;
+        bool isCommment = false;
 
         while (!IsEof())
         {
@@ -42,6 +43,11 @@ public sealed class Scanner
                 {
                     continue;
                 }
+
+                if (isCommment)
+                {
+                    isCommment = false;
+                }
                 
                 PushTokInferType();
                 _line++;
@@ -51,7 +57,24 @@ public sealed class Scanner
             if (isEscape)
             {
                 isEscape = false;
-                _value.Append(current);
+
+                if (!isCommment)
+                {
+                    _value.Append(current);
+                }
+
+                continue;
+            }
+
+            if (current == ';')
+            {
+                PushTokInferType();
+                isCommment = true;
+                continue;
+            }
+            
+            if (isCommment)
+            {
                 continue;
             }
 
